@@ -1,4 +1,4 @@
-import { Calculator, PawPrint } from 'lucide-react'
+import { PawPrint } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { FormulaSpec } from './domain/formulas'
 import type { AttributeStats, CoreStats, ElementKey, ElementStats, PowerBreakdown } from './domain/types'
@@ -164,15 +164,13 @@ export function SectionCard({
 
 export function FormulaCard({ formula, compact = false }: { formula: FormulaSpec; compact?: boolean }) {
   return (
-    <aside className={compact ? 'formula-card compact' : 'formula-card'} aria-label={`${formula.title}计算公式`}>
-      <div className="formula-card-title">
-        <span><Calculator size={16} />计算公式</span>
-        <b>{formula.title}</b>
-      </div>
-      <div className="formula-expressions">
-        {formula.lines.map((line) => <div key={line}>{line}</div>)}
-      </div>
-      {formula.note && <p><PawPrint size={13} />{formula.note}</p>}
+    <aside
+      className={compact ? 'formula-card compact' : 'formula-card'}
+      aria-label={`${formula.title}计算公式`}
+      title={formula.note}
+    >
+      <span className="formula-inline-label"><PawPrint size={14} />计算公式：</span>
+      <span className="formula-inline-expression">{formula.lines.join('；')}</span>
     </aside>
   )
 }

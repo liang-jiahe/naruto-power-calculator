@@ -255,6 +255,10 @@ function App() {
             <button onClick={() => window.print()}><Printer size={16} />PDF</button>
             <button className="danger" onClick={reset}><RotateCcw size={16} />清空</button>
             <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => importJson(e.target.files?.[0])} />
+            <div className="creator-signature" aria-label="署名：繁星の猫猫星">
+              <Cat size={17} aria-hidden="true" />
+              <span>繁星の猫猫星</span>
+            </div>
           </div>
         </header>
 
