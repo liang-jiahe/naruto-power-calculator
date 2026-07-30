@@ -180,6 +180,15 @@ main { margin-left: 248px; }
   box-shadow: 0 2px 8px rgba(56,103,84,.035);
 }
 .toolbar button:hover { border-color: #a5cbb8; color: var(--primary); background: var(--mint-soft); }
+.toolbar button:disabled,
+.toolbar button:disabled:hover {
+  cursor: not-allowed;
+  color: #9ca39f;
+  border-color: #e1e5e2;
+  background: rgba(244, 246, 243, .72);
+  box-shadow: none;
+  opacity: .72;
+}
 .toolbar .danger:hover { color: #a94949; border-color: #e4baba; background: #fff4f4; }
 .creator-signature {
   position: relative;

@@ -275,12 +275,12 @@ function App() {
         <header className="topbar">
           <div className="save-state"><Save size={15} />{toast || '本机自动保存已开启'}</div>
           <div className="toolbar">
-            <button onClick={exportJson}><Download size={16} />导出数据</button>
-            <button onClick={() => fileInput.current?.click()}><Upload size={16} />导入</button>
-            <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')}>
+            <button onClick={exportJson} disabled title="暂未开放"><Download size={16} />导出数据</button>
+            <button onClick={() => fileInput.current?.click()} disabled title="暂未开放"><Upload size={16} />导入</button>
+            <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')} disabled title="暂未开放">
               <FileDown size={16} />公式
             </button>
-            <button onClick={() => window.print()}><Printer size={16} />PDF</button>
+            <button onClick={() => window.print()} disabled title="暂未开放"><Printer size={16} />PDF</button>
             <button className="danger" onClick={reset}><RotateCcw size={16} />清空</button>
             <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => importJson(e.target.files?.[0])} />
             <div className="creator-signature" aria-label="署名：繁星の猫猫星">
