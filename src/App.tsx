@@ -37,6 +37,7 @@ import { SUMMON_DATA } from './domain/data'
 import { calculateAll } from './domain/engine'
 import { buildFormulaText, resolveModuleFormulas } from './domain/formulas'
 import { initialState, parsePayload, RUNE_SLOTS, sanitizeState, STORAGE_KEY } from './domain/state'
+import { createPowerReportPdf } from './export/powerReportPdf'
 import type {
   AttributeStats,
   CalculatorState,
@@ -121,7 +122,11 @@ const loadState = () => {
 }
 
 const downloadText = (name: string, content: string, type: string) => {
-  const url = URL.createObjectURL(new Blob([content], { type }))
+  downloadBlob(name, new Blob([content], { type }))
+}
+
+const downloadBlob = (name: string, blob: Blob) => {
+  const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
   link.download = name
@@ -163,6 +168,7 @@ function App() {
   const [activeWorkspace, setActiveWorkspace] = useState<'power' | 'upgrade'>('power')
   const [powerNavOpen, setPowerNavOpen] = useState(true)
   const [upgradeResetSignal, setUpgradeResetSignal] = useState(0)
+  const [exportingPdf, setExportingPdf] = useState(false)
   const [toast, setToast] = useState('已载入本机数据')
   const fileInput = useRef<HTMLInputElement>(null)
   const result = useMemo(() => calculateAll(state), [state])
@@ -211,9 +217,19 @@ function App() {
       })),
   })
 
-  const exportPdf = () => {
-    setToast('正在打开 PDF 导出窗口…')
-    window.print()
+  const exportPdf = async () => {
+    if (exportingPdf) return
+    setExportingPdf(true)
+    setToast('正在生成 PDF 文件…')
+    try {
+      const blob = await createPowerReportPdf(state, result)
+      downloadBlob(`火影战力报告_${new Date().toISOString().slice(0, 10)}.pdf`, blob)
+      setToast('PDF 文件已下载')
+    } catch (error) {
+      setToast(error instanceof Error ? `PDF 导出失败：${error.message}` : 'PDF 导出失败')
+    } finally {
+      setExportingPdf(false)
+    }
   }
 
   const importJson = async (file?: File) => {
@@ -327,7 +343,9 @@ function App() {
             {activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : '升级配置仅在本次会话保留'}
           </div>
           <div className="toolbar">
-            <button onClick={exportPdf} title="打印或另存为 PDF 文本报告"><Download size={16} />导出 PDF</button>
+            <button onClick={exportPdf} disabled={exportingPdf} title="直接下载 PDF 文本报告">
+              <Download size={16} />{exportingPdf ? '生成中…' : '下载 PDF'}
+            </button>
             <button onClick={() => fileInput.current?.click()} disabled title="暂未开放"><Upload size={16} />导入</button>
             <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')} disabled title="暂未开放">
               <FileDown size={16} />公式

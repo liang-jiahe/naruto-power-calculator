@@ -6,7 +6,6 @@ describe('双板块导航与状态', () => {
   beforeEach(() => {
     localStorage.clear()
     vi.spyOn(window, 'confirm').mockReturnValue(true)
-    vi.spyOn(window, 'print').mockImplementation(() => undefined)
   })
 
   it('战力计算器导航默认展开并可折叠', () => {
@@ -59,13 +58,10 @@ describe('双板块导航与状态', () => {
   it('仅启用 PDF 文本导出，其他工具按钮保持禁用', () => {
     render(<App />)
 
-    const exportButton = screen.getByRole('button', { name: '导出 PDF' })
+    const exportButton = screen.getByRole('button', { name: '下载 PDF' })
     expect(exportButton).toBeEnabled()
     expect(screen.getByRole('button', { name: '导入' })).toBeDisabled()
     expect(screen.getByRole('button', { name: '公式' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'PDF' })).toBeDisabled()
-
-    fireEvent.click(exportButton)
-    expect(window.print).toHaveBeenCalledOnce()
   })
 })
