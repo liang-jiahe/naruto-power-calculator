@@ -1,5 +1,5 @@
 import { PawPrint } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { FormulaSpec } from './domain/formulas'
 import type { AttributeStats, CoreStats, ElementKey, ElementStats, PowerBreakdown } from './domain/types'
 
@@ -26,6 +26,16 @@ export function NumberField({
   step?: number
   suffix?: string
 }) {
+  const emptyValue = min > 0 ? min : 0
+  const [draft, setDraft] = useState(() => String(value))
+
+  useEffect(() => {
+    setDraft((current) => {
+      const currentValue = current.trim() === '' ? emptyValue : Number(current)
+      return Number.isFinite(currentValue) && currentValue === value ? current : String(value)
+    })
+  }, [emptyValue, value])
+
   return (
     <label className="field">
       <span>{label}</span>
@@ -35,10 +45,23 @@ export function NumberField({
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={draft}
           onChange={(event) => {
-            const next = Number(event.target.value)
-            onChange(Number.isFinite(next) ? Math.min(max ?? Infinity, Math.max(min, next)) : min)
+            const raw = event.target.value
+            setDraft(raw)
+            if (raw.trim() === '') {
+              onChange(emptyValue)
+              return
+            }
+
+            const parsed = Number(raw)
+            if (!Number.isFinite(parsed)) return
+            const next = Math.min(max ?? Infinity, Math.max(min, parsed))
+            if (next !== parsed) setDraft(String(next))
+            onChange(next)
+          }}
+          onBlur={() => {
+            if (draft.trim() !== '' && !Number.isFinite(Number(draft))) setDraft(String(value))
           }}
         />
         {suffix && <b>{suffix}</b>}

@@ -399,7 +399,7 @@ function App() {
                 options={Object.keys(SUMMON_DATA).map((name) => ({ value: name, label: name }))}
                 onChange={(beast) => setState((s) => ({ ...s, summon: { ...s.summon, beast, level: Math.min(s.summon.level, SUMMON_DATA[beast].length) } }))}
               />
-              <NumberField label={`等级（最高 ${result.summon.maxLevel}）`} value={state.summon.level} min={1} max={result.summon.maxLevel} onChange={(level) => setState((s) => ({ ...s, summon: { ...s.summon, level: Math.trunc(level) } }))} />
+              <NumberField label={`修炼等级（最高 ${result.summon.maxLevel}）`} value={state.summon.level} min={1} max={result.summon.maxLevel} onChange={(level) => setState((s) => ({ ...s, summon: { ...s.summon, level: Math.trunc(level) } }))} />
               <ThemedSelect
                 label="强化次数"
                 value={state.summon.enhance}
@@ -408,7 +408,7 @@ function App() {
               />
             </div>
             <div className="split-editor"><div><h3>输入通灵总面板</h3><CoreEditor value={state.summon.total} onChange={(key, value) => setState((s) => ({ ...s, summon: { ...s.summon, total: { ...s.summon.total, [key]: value } } }))} /></div>
-              <div className="summon-result"><h3>查表拆分</h3><p>修炼：生命 {formatNumber(result.summon.cultivate.hp, 0)} · 攻击 {formatNumber(result.summon.cultivate.atk, 0)} · 防御 {formatNumber(result.summon.cultivate.def, 0)}</p><p>进阶：生命 {formatNumber(result.summon.advance.hp, 0)} · 攻击 {formatNumber(result.summon.advance.atk, 0)} · 防御 {formatNumber(result.summon.advance.def, 0)}</p></div></div>
+              <div className="summon-result"><h3>查表拆分</h3><p className="summon-progress">修炼等级：{state.summon.level} 级 · 第 {state.summon.enhance} 次强化</p><p>修炼：生命 {formatNumber(result.summon.cultivate.hp, 0)} · 攻击 {formatNumber(result.summon.cultivate.atk, 0)} · 防御 {formatNumber(result.summon.cultivate.def, 0)}</p><p>进阶：生命 {formatNumber(result.summon.advance.hp, 0)} · 攻击 {formatNumber(result.summon.advance.atk, 0)} · 防御 {formatNumber(result.summon.advance.def, 0)}</p></div></div>
             <BreakdownStrip data={result.sections.summoning} />
           </SectionCard>
 
