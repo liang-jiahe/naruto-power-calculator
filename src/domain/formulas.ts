@@ -8,11 +8,11 @@ export type FormulaSpec = {
 }
 
 const coreWithCollection = [
-  `P三维 = 生命 × ${COEFFICIENTS.hp} × M生命 + 攻击 × ${COEFFICIENTS.atk} × M攻击 + 防御 × ${COEFFICIENTS.def} × M防御`,
+  `P三维 = 生命 × M生命 + 攻击 × ${COEFFICIENTS.atk} × M攻击 + 防御 × ${COEFFICIENTS.def} × M防御`,
 ]
 
 const coreWithoutCollection = [
-  `P三维 = 生命 × ${COEFFICIENTS.hp} + 攻击 × ${COEFFICIENTS.atk} + 防御 × ${COEFFICIENTS.def}`,
+  `P三维 = 生命 + 攻击 × ${COEFFICIENTS.atk} + 防御 × ${COEFFICIENTS.def}`,
 ]
 
 export const MODULE_FORMULAS = {
@@ -36,7 +36,7 @@ export const MODULE_FORMULAS = {
   level: {
     title: '等级查表战力',
     lines: [
-      `P等级 = 表生命 × ${COEFFICIENTS.hp} × M生命 + 表攻击 × ${COEFFICIENTS.atk} × M攻击 + 表防御 × ${COEFFICIENTS.def} × M防御`,
+      `P等级 = 表生命 × M生命 + 表攻击 × ${COEFFICIENTS.atk} × M攻击 + 表防御 × ${COEFFICIENTS.def} × M防御`,
       `　　　 + 表暴击 × ${COEFFICIENTS.crit} + 表抗暴 × ${COEFFICIENTS.antiCrit}`,
     ],
     note: '20–170 级按内置等级数据表精确取值。',
@@ -44,8 +44,8 @@ export const MODULE_FORMULAS = {
   soul: {
     title: '忍魂战力',
     lines: [
-      `P感悟 = 感悟生命 × ${COEFFICIENTS.hp} × M生命 + 感悟攻击 × ${COEFFICIENTS.atk} × M攻击 + 感悟防御 × ${COEFFICIENTS.def} × M防御`,
-      `P羁绊 = 羁绊生命 × ${COEFFICIENTS.hp} + 羁绊攻击 × ${COEFFICIENTS.atk} + 羁绊防御 × ${COEFFICIENTS.def}`,
+      `P感悟 = 感悟生命 × M生命 + 感悟攻击 × ${COEFFICIENTS.atk} × M攻击 + 感悟防御 × ${COEFFICIENTS.def} × M防御`,
+      `P羁绊 = 羁绊生命 + 羁绊攻击 × ${COEFFICIENTS.atk} + 羁绊防御 × ${COEFFICIENTS.def}`,
       'P忍魂 = P感悟 + P羁绊',
     ],
     note: '忍传感悟吃收集加成，羁绊升级不吃。',
@@ -73,7 +73,7 @@ export const MODULE_FORMULAS = {
   accessories: {
     title: '饰品与符文战力',
     lines: [
-      `P饰品 = 生命 × ${COEFFICIENTS.hp} × M生命 + 攻击 × ${COEFFICIENTS.atk} × M攻击 + 防御 × ${COEFFICIENTS.def} × M防御 + 暴击 × ${COEFFICIENTS.crit} + 抗暴 × ${COEFFICIENTS.antiCrit}`,
+      `P饰品 = 生命 × M生命 + 攻击 × ${COEFFICIENTS.atk} × M攻击 + 防御 × ${COEFFICIENTS.def} × M防御 + 暴击 × ${COEFFICIENTS.crit} + 抗暴 × ${COEFFICIENTS.antiCrit}`,
       'P符文 = Σ六件符文直接战力 + P三维（Σ六件共鸣属性，吃收集）',
       'P饰品符文 = P饰品 + P符文',
     ],
@@ -96,7 +96,7 @@ export const MODULE_FORMULAS = {
   toolPanel: {
     title: '忍具穿戴战力',
     lines: [
-      `P穿戴 = 生命 × ${COEFFICIENTS.hp} × M生命 + 攻击 × ${COEFFICIENTS.atk} × M攻击 + 防御 × ${COEFFICIENTS.def} × M防御`,
+      `P穿戴 = 生命 × M生命 + 攻击 × ${COEFFICIENTS.atk} × M攻击 + 防御 × ${COEFFICIENTS.def} × M防御`,
       `　　　 + 暴击 × ${COEFFICIENTS.crit} + 抗暴 × ${COEFFICIENTS.antiCrit} + Σ元素攻击 × ${COEFFICIENTS.elementAtk} + Σ元素防御 × ${COEFFICIENTS.elementDef}`,
     ],
     note: '只有生命、攻击、防御吃收集加成。',
@@ -104,7 +104,7 @@ export const MODULE_FORMULAS = {
   toolReforge: {
     title: '挂件坠饰重铸战力',
     lines: [
-      `P重铸 = 生命 × ${COEFFICIENTS.hp} + 攻击 × ${COEFFICIENTS.atk} + 防御 × ${COEFFICIENTS.def} + 暴击 × ${COEFFICIENTS.crit} + 抗暴 × ${COEFFICIENTS.antiCrit}`,
+      `P重铸 = 生命 + 攻击 × ${COEFFICIENTS.atk} + 防御 × ${COEFFICIENTS.def} + 暴击 × ${COEFFICIENTS.crit} + 抗暴 × ${COEFFICIENTS.antiCrit}`,
     ],
     note: '重铸不吃收集加成，也不计算元素攻防。',
   },
@@ -112,7 +112,7 @@ export const MODULE_FORMULAS = {
     title: '藏馆战力',
     lines: [
       '直接战力模式：P藏馆 = 输入战力',
-      `属性计算模式：P藏馆 = 生命 × ${COEFFICIENTS.hp} + 攻击 × ${COEFFICIENTS.atk} + 防御 × ${COEFFICIENTS.def} + 暴击 × ${COEFFICIENTS.crit} + 抗暴 × ${COEFFICIENTS.antiCrit} + Σ元素攻击 × ${COEFFICIENTS.elementAtk} + Σ元素防御 × ${COEFFICIENTS.elementDef}`,
+      `属性计算模式：P藏馆 = 生命 + 攻击 × ${COEFFICIENTS.atk} + 防御 × ${COEFFICIENTS.def} + 暴击 × ${COEFFICIENTS.crit} + 抗暴 × ${COEFFICIENTS.antiCrit} + Σ元素攻击 × ${COEFFICIENTS.elementAtk} + Σ元素防御 × ${COEFFICIENTS.elementDef}`,
     ],
     note: '藏馆属性计算不吃收集加成；直接战力不反推面板属性。',
   },
@@ -217,7 +217,7 @@ export function buildFormulaText(
   return `忍界战力计算器 · V1 公式说明
 
 基础系数
-生命 × ${COEFFICIENTS.hp}
+生命（原值计入）
 攻击 × ${COEFFICIENTS.atk}
 防御 × ${COEFFICIENTS.def}
 暴击 / 元素攻击 × ${COEFFICIENTS.crit}

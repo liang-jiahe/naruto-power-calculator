@@ -599,19 +599,23 @@ main { margin-left: 248px; }
   gap: 5px;
   flex: none;
   color: var(--primary);
-  font-size: 11px;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "PingFang SC", sans-serif;
+  font-size: 12px;
   font-weight: 800;
-  line-height: 1.65;
+  line-height: 1.75;
   white-space: nowrap;
 }
 .formula-inline-label svg { flex: none; }
 .formula-inline-expression {
   min-width: 0;
   color: #34433b;
-  font-size: 11.5px;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "PingFang SC", sans-serif;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.65;
+  line-height: 1.75;
+  letter-spacing: .01em;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
   overflow-wrap: anywhere;
 }
 .field-grid { display: grid; gap: 10px; margin-bottom: 13px; }
@@ -755,7 +759,7 @@ footer p { margin: 0; }
   .hero p { font-size: 12px; }
   .hero-cat-sticker { width: 92px; right: 2px; bottom: 146px; }
   .formula-card { padding: 9px 10px; border-radius: 11px; gap: 4px; flex-direction: column; }
-  .formula-inline-expression { font-size: 10.5px; line-height: 1.7; }
+  .formula-inline-expression { font-size: 11.5px; line-height: 1.75; }
   .panel, .bonus-panel, .section-body, .tool-block { padding: 17px; }
   .section-head { padding: 19px 17px; display: block; border-radius: 26px 26px 0 0; }
   .section-total { text-align: left; margin-top: 13px; }

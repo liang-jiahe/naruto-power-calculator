@@ -58,6 +58,8 @@ describe('页面公式说明', () => {
     expect(formulas.collection.lines[1]).toContain('= 1.2233')
     expect(formulas.level.lines.join('\n')).toContain('× 1.203')
     expect(formulas.level.lines.join('\n')).toContain('× 1.2233')
+    expect(formulas.level.lines.join('\n')).toContain('表生命 × 1.203')
+    expect(formulas.level.lines.join('\n')).not.toContain('表生命 × 1 ×')
     expect(formulas.level.lines.join('\n')).not.toContain('M生命')
     expect(formulas.level.lines.join('\n')).not.toContain('M攻击')
     expect(formulas.level.lines.join('\n')).not.toContain('M防御')
@@ -73,6 +75,8 @@ describe('页面公式说明', () => {
     const text = buildFormulaText(formulas)
 
     expect(text).toContain('生命倍率 = 1 + 16.2 ÷ 100 × (1 + 5 ÷ 100) = 1.1701')
+    expect(text).not.toContain('生命 × 1 ×')
+    expect(text).not.toContain('生命 × 1 +')
     expect(text).not.toContain('M生命')
     expect(text).not.toContain('M攻击')
     expect(text).not.toContain('M防御')
