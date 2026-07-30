@@ -1,4 +1,5 @@
-import { COEFFICIENTS } from './engine'
+import { COEFFICIENTS, collectionMultiplier } from './engine'
+import type { BonusConfig } from './types'
 
 export type FormulaSpec = {
   title: string
@@ -166,7 +167,54 @@ const formulaLabels: Record<keyof typeof MODULE_FORMULAS, string> = {
   avatar: '头像框',
 }
 
-export const FORMULA_TEXT = `忍界战力计算器 · V1 公式说明
+const formatMultiplier = (value: number) => Number(value.toFixed(6)).toString()
+
+export function resolveModuleFormulas(
+  bonuses: BonusConfig,
+): Record<keyof typeof MODULE_FORMULAS, FormulaSpec> {
+  const hpMultiplier = formatMultiplier(collectionMultiplier(bonuses.collectionPct, bonuses.hpPct))
+  const atkMultiplier = formatMultiplier(collectionMultiplier(bonuses.collectionPct, bonuses.atkPct))
+  const defMultiplier = formatMultiplier(collectionMultiplier(bonuses.collectionPct, bonuses.defPct))
+  const replacements = [
+    ['M生命', hpMultiplier],
+    ['M攻击', atkMultiplier],
+    ['M防御', defMultiplier],
+  ] as const
+
+  return Object.fromEntries(
+    (Object.keys(MODULE_FORMULAS) as Array<keyof typeof MODULE_FORMULAS>).map((key) => {
+      const formula = MODULE_FORMULAS[key]
+      if (key === 'collection') {
+        return [
+          key,
+          {
+            ...formula,
+            lines: [
+              `生命倍率 = 1 + ${bonuses.collectionPct} ÷ 100 × (1 + ${bonuses.hpPct} ÷ 100) = ${hpMultiplier}`,
+              `攻击倍率 = 1 + ${bonuses.collectionPct} ÷ 100 × (1 + ${bonuses.atkPct} ÷ 100) = ${atkMultiplier}`,
+              `防御倍率 = 1 + ${bonuses.collectionPct} ÷ 100 × (1 + ${bonuses.defPct} ÷ 100) = ${defMultiplier}`,
+            ],
+          },
+        ]
+      }
+
+      return [
+        key,
+        {
+          ...formula,
+          lines: formula.lines.map((line) =>
+            replacements.reduce((resolved, [token, value]) => resolved.replaceAll(token, value), line),
+          ),
+        },
+      ]
+    }),
+  ) as Record<keyof typeof MODULE_FORMULAS, FormulaSpec>
+}
+
+export function buildFormulaText(
+  formulas: Record<keyof typeof MODULE_FORMULAS, FormulaSpec> = MODULE_FORMULAS,
+) {
+  return `忍界战力计算器 · V1 公式说明
 
 基础系数
 生命 × ${COEFFICIENTS.hp}
@@ -175,12 +223,15 @@ export const FORMULA_TEXT = `忍界战力计算器 · V1 公式说明
 暴击 / 元素攻击 × ${COEFFICIENTS.crit}
 抗暴 / 元素防御 × ${COEFFICIENTS.antiCrit}
 
-${(Object.keys(MODULE_FORMULAS) as Array<keyof typeof MODULE_FORMULAS>)
+${(Object.keys(formulas) as Array<keyof typeof MODULE_FORMULAS>)
   .map((key) => {
-    const formula = MODULE_FORMULAS[key]
+    const formula = formulas[key]
     return `${formulaLabels[key]} · ${formula.title}
 ${formula.lines.join('\n')}
 ${formula.note ?? ''}`
   })
   .join('\n\n')}
 `
+}
+
+export const FORMULA_TEXT = buildFormulaText()

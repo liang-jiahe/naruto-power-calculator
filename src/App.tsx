@@ -33,7 +33,7 @@ import {
 import { ThemedSelect } from './ThemedSelect'
 import { SUMMON_DATA } from './domain/data'
 import { calculateAll } from './domain/engine'
-import { FORMULA_TEXT, MODULE_FORMULAS } from './domain/formulas'
+import { buildFormulaText, resolveModuleFormulas } from './domain/formulas'
 import { exportPayload, initialState, parsePayload, RUNE_SLOTS, sanitizeState, STORAGE_KEY } from './domain/state'
 import type {
   AttributeStats,
@@ -134,6 +134,7 @@ function App() {
   const [toast, setToast] = useState('已载入本机数据')
   const fileInput = useRef<HTMLInputElement>(null)
   const result = useMemo(() => calculateAll(state), [state])
+  const formulas = useMemo(() => resolveModuleFormulas(state.bonuses), [state.bonuses])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -249,7 +250,7 @@ function App() {
           <div className="toolbar">
             <button onClick={exportJson}><Download size={16} />导出数据</button>
             <button onClick={() => fileInput.current?.click()}><Upload size={16} />导入</button>
-            <button onClick={() => downloadText('忍界战力公式.txt', FORMULA_TEXT, 'text/plain;charset=utf-8')}>
+            <button onClick={() => downloadText('忍界战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')}>
               <FileDown size={16} />公式
             </button>
             <button onClick={() => window.print()}><Printer size={16} />PDF</button>
@@ -313,7 +314,7 @@ function App() {
               <p className="panel-footnote"><CircleHelp size={15} />符文、藏馆、珍品阁的直接战力无法反推属性，单独列入综合战力。</p>
             </article>
           </section>
-          <FormulaCard formula={MODULE_FORMULAS.overview} compact />
+          <FormulaCard formula={formulas.overview} compact />
 
           <section id="collection" className="bonus-panel">
             <img
@@ -341,23 +342,23 @@ function App() {
                   onChange={(value) => setState((s) => ({ ...s, bonuses: { ...s.bonuses, [key]: value } }))} />
               ))}
             </div>
-            <FormulaCard formula={MODULE_FORMULAS.collection} compact />
+            <FormulaCard formula={formulas.collection} compact />
           </section>
 
-          <SectionCard id="level" eyebrow="LEVEL" title="等级战力" description="按 20–170 级收益表精确查表，并叠加全局收集倍率。" value={result.sections.level.total} formula={MODULE_FORMULAS.level} tone="blue">
+          <SectionCard id="level" eyebrow="LEVEL" title="等级战力" description="按 20–170 级收益表精确查表，并叠加全局收集倍率。" value={result.sections.level.total} formula={formulas.level} tone="blue">
             <div className="level-field">
               <NumberField label="当前等级" value={state.level} min={20} max={170} onChange={(level) => setState((s) => ({ ...s, level: Math.trunc(level) }))} />
             </div>
             <BreakdownStrip data={result.sections.level} />
           </SectionCard>
 
-          <SectionCard id="soul" eyebrow="SOUL" title="忍魂" description="忍传感悟吃收集加成；羁绊升级按基础系数直接换算。" value={result.sections.soul.total} formula={MODULE_FORMULAS.soul}>
+          <SectionCard id="soul" eyebrow="SOUL" title="忍魂" description="忍传感悟吃收集加成；羁绊升级按基础系数直接换算。" value={result.sections.soul.total} formula={formulas.soul}>
             <div className="split-editor"><div><h3>忍传感悟</h3><CoreEditor value={state.soul.insight} onChange={(key, value) => setState((s) => ({ ...s, soul: { ...s.soul, insight: { ...s.soul.insight, [key]: value } } }))} /></div>
               <div><h3>羁绊升级</h3><CoreEditor value={state.soul.bond} onChange={(key, value) => setState((s) => ({ ...s, soul: { ...s.soul, bond: { ...s.soul.bond, [key]: value } } }))} /></div></div>
             <BreakdownStrip data={result.sections.soul} />
           </SectionCard>
 
-          <SectionCard id="talent" eyebrow="TALENT" title="天赋" description="普通天赋与修罗天赋分别计算，再汇入天赋总战力。" value={result.sections.talent.total} formula={MODULE_FORMULAS.talent} tone="purple">
+          <SectionCard id="talent" eyebrow="TALENT" title="天赋" description="普通天赋与修罗天赋分别计算，再汇入天赋总战力。" value={result.sections.talent.total} formula={formulas.talent} tone="purple">
             <div className="split-editor"><div><h3>普通天赋</h3><CoreEditor value={state.talent.normal} onChange={(key, value) => setState((s) => ({ ...s, talent: { ...s.talent, normal: { ...s.talent.normal, [key]: value } } }))} /></div>
               <div><h3>修罗天赋</h3><CoreEditor value={state.talent.shura} onChange={(key, value) => setState((s) => ({ ...s, talent: { ...s.talent, shura: { ...s.talent.shura, [key]: value } } }))} /></div></div>
             <BreakdownStrip data={result.sections.talent} />
@@ -367,13 +368,13 @@ function App() {
             ['equipment', 'EQUIPMENT', '装备', '装备三维属性吃全局收集倍率。', 'blue'],
             ['magatama', 'MAGATAMA', '勾玉', '勾玉生命、攻击、防御统一计算。', 'green'],
           ] as const).map(([key, eyebrow, title, description, tone]) => (
-            <SectionCard key={key} id={key} eyebrow={eyebrow} title={title} description={description} value={result.sections[key].total} formula={MODULE_FORMULAS[key]} tone={tone}>
+            <SectionCard key={key} id={key} eyebrow={eyebrow} title={title} description={description} value={result.sections[key].total} formula={formulas[key]} tone={tone}>
               <CoreEditor value={state.simple[key]} onChange={(field, value) => updateSimple(key, field, value)} />
               <BreakdownStrip data={result.sections[key]} />
             </SectionCard>
           ))}
 
-          <SectionCard id="accessories" eyebrow="ACCESSORIES" title="饰品与符文" description="饰品属性、六件符文直接战力和自动匹配的共鸣属性合并计算。" value={result.sections.accessories.total} formula={MODULE_FORMULAS.accessories} tone="green">
+          <SectionCard id="accessories" eyebrow="ACCESSORIES" title="饰品与符文" description="饰品属性、六件符文直接战力和自动匹配的共鸣属性合并计算。" value={result.sections.accessories.total} formula={formulas.accessories} tone="green">
             <AttributeEditor value={state.accessories.stats} {...attrHandlers('accessories')} elements={false} />
             <div className="rune-grid">
               {RUNE_SLOTS.map((slot) => {
@@ -386,11 +387,11 @@ function App() {
             <BreakdownStrip data={result.sections.accessories} />
           </SectionCard>
 
-          <SectionCard id="artifact" eyebrow="ARTIFACT" title="神器" description="神器三维属性吃全局收集倍率。" value={result.sections.artifact.total} formula={MODULE_FORMULAS.artifact} tone="purple">
+          <SectionCard id="artifact" eyebrow="ARTIFACT" title="神器" description="神器三维属性吃全局收集倍率。" value={result.sections.artifact.total} formula={formulas.artifact} tone="purple">
             <CoreEditor value={state.simple.artifact} onChange={(key, value) => updateSimple('artifact', key, value)} /><BreakdownStrip data={result.sections.artifact} />
           </SectionCard>
 
-          <SectionCard id="summoning" eyebrow="SUMMON" title="通灵" description="修炼属性由通灵兽、等级与强化次数查表；进阶属性由总面板扣除修炼值。" value={result.sections.summoning.total} formula={MODULE_FORMULAS.summoning}>
+          <SectionCard id="summoning" eyebrow="SUMMON" title="通灵" description="修炼属性由通灵兽、等级与强化次数查表；进阶属性由总面板扣除修炼值。" value={result.sections.summoning.total} formula={formulas.summoning}>
             <div className="summon-selects">
               <ThemedSelect
                 label="通灵兽"
@@ -414,14 +415,14 @@ function App() {
           <section id="tools" className="section-card tone-blue">
             <header className="section-head"><div><span className="eyebrow">NINJA TOOL</span><h2>忍具系统</h2><p>穿戴、重铸、藏馆与珍品阁分项计算，避免模式混用。</p></div>
               <div className="section-total"><span>忍具总战力</span><strong>{formatNumber(result.sections.toolPanel.total + result.sections.toolReforge.total + result.sections.toolMuseum.total + result.sections.toolTreasure.total)}</strong></div></header>
-            <div className="tool-block"><h3>忍具穿戴 · {formatNumber(result.sections.toolPanel.total)}</h3><FormulaCard formula={MODULE_FORMULAS.toolPanel} compact /><AttributeEditor value={state.tools.panel} {...attrHandlers('panel')} /><BreakdownStrip data={result.sections.toolPanel} /></div>
-            <div className="tool-block"><h3>挂件坠饰重铸 · {formatNumber(result.sections.toolReforge.total)}</h3><FormulaCard formula={MODULE_FORMULAS.toolReforge} compact /><AttributeEditor value={state.tools.reforge} {...attrHandlers('reforge')} elements={false} /><BreakdownStrip data={result.sections.toolReforge} /></div>
+            <div className="tool-block"><h3>忍具穿戴 · {formatNumber(result.sections.toolPanel.total)}</h3><FormulaCard formula={formulas.toolPanel} compact /><AttributeEditor value={state.tools.panel} {...attrHandlers('panel')} /><BreakdownStrip data={result.sections.toolPanel} /></div>
+            <div className="tool-block"><h3>挂件坠饰重铸 · {formatNumber(result.sections.toolReforge.total)}</h3><FormulaCard formula={formulas.toolReforge} compact /><AttributeEditor value={state.tools.reforge} {...attrHandlers('reforge')} elements={false} /><BreakdownStrip data={result.sections.toolReforge} /></div>
             <div className="tool-block"><div className="tool-title"><h3>藏馆 · {formatNumber(result.sections.toolMuseum.total)}</h3><ModeSwitch value={state.tools.museumMode} onChange={(museumMode) => setState((s) => ({ ...s, tools: { ...s.tools, museumMode } }))} /></div>
-              <FormulaCard formula={MODULE_FORMULAS.toolMuseum} compact />
+              <FormulaCard formula={formulas.toolMuseum} compact />
               {state.tools.museumMode === 'direct' ? <NumberField label="藏馆直接战力" value={state.tools.museumDirectPower} onChange={(museumDirectPower) => setState((s) => ({ ...s, tools: { ...s.tools, museumDirectPower } }))} /> : <AttributeEditor value={state.tools.museumStats} {...attrHandlers('museumStats')} />}
               <BreakdownStrip data={result.sections.toolMuseum} /></div>
             <div className="tool-block"><div className="tool-title"><h3>珍品阁 · {formatNumber(result.sections.toolTreasure.total)}</h3><ModeSwitch value={state.tools.treasureMode} onChange={(treasureMode) => setState((s) => ({ ...s, tools: { ...s.tools, treasureMode } }))} /></div>
-              <FormulaCard formula={MODULE_FORMULAS.toolTreasure} compact />
+              <FormulaCard formula={formulas.toolTreasure} compact />
               {state.tools.treasureMode === 'direct' ? <NumberField label="珍品阁直接战力" value={state.tools.treasureDirectPower} onChange={(treasureDirectPower) => setState((s) => ({ ...s, tools: { ...s.tools, treasureDirectPower } }))} /> : <ElementEditor title="五行防御" value={state.tools.treasureElementDef} onChange={(key, value) => setState((s) => ({ ...s, tools: { ...s.tools, treasureElementDef: { ...s.tools.treasureElementDef, [key]: value } } }))} />}
               <BreakdownStrip data={result.sections.toolTreasure} /></div>
           </section>
@@ -432,7 +433,7 @@ function App() {
             ['title', 'TITLE', '称号', '称号三维属性吃全局收集倍率。', 'orange'],
             ['avatar', 'AVATAR', '头像框', '头像框三维属性吃全局收集倍率。', 'blue'],
           ] as const).map(([key, eyebrow, title, description, tone]) => (
-            <SectionCard key={key} id={key} eyebrow={eyebrow} title={title} description={description} value={result.sections[key].total} formula={MODULE_FORMULAS[key]} tone={tone}>
+            <SectionCard key={key} id={key} eyebrow={eyebrow} title={title} description={description} value={result.sections[key].total} formula={formulas[key]} tone={tone}>
               <CoreEditor value={state.simple[key]} onChange={(field, value) => updateSimple(key, field, value)} />
               <BreakdownStrip data={result.sections[key]} />
             </SectionCard>

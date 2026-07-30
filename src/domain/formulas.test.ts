@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { COEFFICIENTS } from './engine'
-import { FORMULA_TEXT, MODULE_FORMULAS } from './formulas'
+import { buildFormulaText, FORMULA_TEXT, MODULE_FORMULAS, resolveModuleFormulas } from './formulas'
 
 describe('页面公式说明', () => {
   it('覆盖总览、收集倍率、全部模块和忍具子模块', () => {
@@ -44,5 +44,37 @@ describe('页面公式说明', () => {
       expect(FORMULA_TEXT).toContain(formula.title)
       for (const line of formula.lines) expect(FORMULA_TEXT).toContain(line)
     }
+  })
+
+  it('把收集倍率符号解析为当前实际数字', () => {
+    const formulas = resolveModuleFormulas({
+      collectionPct: 20.3,
+      hpPct: 0,
+      atkPct: 10,
+      defPct: 0,
+    })
+
+    expect(formulas.collection.lines[0]).toContain('= 1.203')
+    expect(formulas.collection.lines[1]).toContain('= 1.2233')
+    expect(formulas.level.lines.join('\n')).toContain('× 1.203')
+    expect(formulas.level.lines.join('\n')).toContain('× 1.2233')
+    expect(formulas.level.lines.join('\n')).not.toContain('M生命')
+    expect(formulas.level.lines.join('\n')).not.toContain('M攻击')
+    expect(formulas.level.lines.join('\n')).not.toContain('M防御')
+  })
+
+  it('导出的公式文本使用当前倍率数字', () => {
+    const formulas = resolveModuleFormulas({
+      collectionPct: 16.2,
+      hpPct: 5,
+      atkPct: 0,
+      defPct: 2,
+    })
+    const text = buildFormulaText(formulas)
+
+    expect(text).toContain('生命倍率 = 1 + 16.2 ÷ 100 × (1 + 5 ÷ 100) = 1.1701')
+    expect(text).not.toContain('M生命')
+    expect(text).not.toContain('M攻击')
+    expect(text).not.toContain('M防御')
   })
 })
