@@ -1,4 +1,6 @@
+import { Calculator, PawPrint } from 'lucide-react'
 import type { ReactNode } from 'react'
+import type { FormulaSpec } from './domain/formulas'
 import type { AttributeStats, CoreStats, ElementKey, ElementStats, PowerBreakdown } from './domain/types'
 
 export const formatNumber = (value: number, digits = 2) =>
@@ -126,6 +128,7 @@ export function SectionCard({
   title,
   description,
   value,
+  formula,
   tone = 'orange',
   children,
 }: {
@@ -134,6 +137,7 @@ export function SectionCard({
   title: string
   description: string
   value: number
+  formula?: FormulaSpec
   tone?: 'orange' | 'blue' | 'purple' | 'green'
   children: ReactNode
 }) {
@@ -150,8 +154,26 @@ export function SectionCard({
           <strong>{formatNumber(value)}</strong>
         </div>
       </header>
-      <div className="section-body">{children}</div>
+      <div className="section-body">
+        {formula && <FormulaCard formula={formula} />}
+        {children}
+      </div>
     </section>
+  )
+}
+
+export function FormulaCard({ formula, compact = false }: { formula: FormulaSpec; compact?: boolean }) {
+  return (
+    <aside className={compact ? 'formula-card compact' : 'formula-card'} aria-label={`${formula.title}计算公式`}>
+      <div className="formula-card-title">
+        <span><Calculator size={16} />计算公式</span>
+        <b>{formula.title}</b>
+      </div>
+      <div className="formula-expressions">
+        {formula.lines.map((line) => <div key={line}>{line}</div>)}
+      </div>
+      {formula.note && <p><PawPrint size={13} />{formula.note}</p>}
+    </aside>
   )
 }
 

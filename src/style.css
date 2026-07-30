@@ -543,6 +543,89 @@ main { margin-left: 248px; }
 .tone-purple .eyebrow, .tone-purple .section-total strong { color: var(--purple); }
 .tone-green .eyebrow, .tone-green .section-total strong { color: var(--green); }
 .section-body { padding: 23px 25px 25px; }
+.formula-card {
+  position: relative;
+  margin: 0 0 20px;
+  padding: 15px 16px 14px;
+  border: 1px solid #d7e7dd;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(229, 247, 238, .88), rgba(255, 249, 216, .68));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+  overflow: visible;
+}
+.formula-card::before, .formula-card::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  width: 16px;
+  height: 13px;
+  background: #d8f0e4;
+  border: 1px solid #c6dfd1;
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+.formula-card::before { left: 18px; transform: rotate(-10deg); }
+.formula-card::after { left: 40px; transform: rotate(10deg); }
+.formula-card.compact { padding: 13px 15px; }
+.dashboard-grid + .formula-card { margin: 0 0 24px; }
+.bonus-panel > .formula-card {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+}
+.tool-block .formula-card { margin-bottom: 16px; }
+.formula-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+.formula-card-title > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.formula-card-title > span svg { flex: none; }
+.formula-card-title > b {
+  color: #657169;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.formula-expressions {
+  display: grid;
+  gap: 5px;
+  color: #34433b;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+}
+.formula-expressions > div {
+  padding-left: 12px;
+  border-left: 3px solid rgba(56, 103, 84, .2);
+  overflow-wrap: anywhere;
+}
+.formula-card p {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 9px 0 0;
+  padding-top: 9px;
+  border-top: 1px dashed rgba(56, 103, 84, .17);
+  color: #68756e;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+.formula-card p svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--primary);
+}
 .field-grid { display: grid; gap: 10px; margin-bottom: 13px; }
 .field-grid.two { grid-template-columns: repeat(2, 1fr); }
 .field-grid.three { grid-template-columns: repeat(3, 1fr); }
@@ -558,19 +641,7 @@ main { margin-left: 248px; }
 .breakdown-strip span { color: var(--muted); font-size: 9.5px; font-weight: 700; }
 .breakdown-strip b { color: var(--charcoal); font-size: 11px; }
 .empty-inline { color: #7e8a83; font-size: 10px; }
-.input-and-note { display: grid; grid-template-columns: 220px 1fr; gap: 12px; align-items: end; }
-.formula-note {
-  min-height: 42px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  padding: 9px 12px;
-  color: #667169;
-  background: var(--yellow);
-  border: 1px solid #eee3a8;
-  font-size: 10.5px;
-  font-weight: 700;
-}
+.level-field { width: min(220px, 100%); }
 .subheading { color: var(--primary); font-size: 11px; margin: 14px 0 8px; font-weight: 800; }
 .element-editor { padding-top: 3px; }
 .rune-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; margin-top: 17px; }
@@ -695,11 +766,16 @@ footer p { margin: 0; }
   .hero h1 { font-size: 31px; }
   .hero p { font-size: 12px; }
   .hero-cat-sticker { width: 92px; right: 2px; bottom: 146px; }
+  .formula-card { padding: 13px; border-radius: 16px; }
+  .formula-card-title { align-items: flex-start; }
+  .formula-card-title > b { text-align: right; }
+  .formula-expressions { font-size: 11px; line-height: 1.75; }
+  .formula-card p { font-size: 10px; }
   .panel, .bonus-panel, .section-body, .tool-block { padding: 17px; }
   .section-head { padding: 19px 17px; display: block; border-radius: 26px 26px 0 0; }
   .section-total { text-align: left; margin-top: 13px; }
   .section-total strong { font-size: 18px; }
-  .bonus-fields, .field-grid.two, .field-grid.three, .summon-selects, .input-and-note, .rune-grid { grid-template-columns: 1fr; }
+  .bonus-fields, .field-grid.two, .field-grid.three, .summon-selects, .rune-grid { grid-template-columns: 1fr; }
   .field-grid.five { grid-template-columns: repeat(2, 1fr); }
   .chart-row { grid-template-columns: 54px 1fr 62px; }
 }
