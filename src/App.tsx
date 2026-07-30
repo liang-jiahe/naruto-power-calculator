@@ -40,6 +40,7 @@ import type {
   CalculatorState,
   CoreStats,
   ElementKey,
+  PowerBreakdown,
   SimpleModuleKey,
 } from './domain/types'
 
@@ -127,6 +128,32 @@ const downloadText = (name: string, content: string, type: string) => {
 }
 
 const stickerAsset = (name: string) => `${import.meta.env.BASE_URL}stickers/${name}`
+
+function SummonPowerCard({
+  title,
+  badge,
+  data,
+  tone,
+}: {
+  title: string
+  badge: string
+  data: PowerBreakdown
+  tone: 'cultivate' | 'advance'
+}) {
+  return (
+    <article className={`summon-power-card ${tone}`}>
+      <div className="summon-power-title">
+        <div><span>{title}</span><small>{badge}</small></div>
+        <strong>{formatNumber(data.total)}</strong>
+      </div>
+      <div className="summon-power-stats">
+        <div><span>生命战力</span><b>{formatNumber(data.hp)}</b></div>
+        <div><span>攻击战力</span><b>{formatNumber(data.atk)}</b></div>
+        <div><span>防御战力</span><b>{formatNumber(data.def)}</b></div>
+      </div>
+    </article>
+  )
+}
 
 function App() {
   const [state, setState] = useState<CalculatorState>(loadState)
@@ -409,7 +436,15 @@ function App() {
             </div>
             <div className="split-editor"><div><h3>输入通灵总面板</h3><CoreEditor value={state.summon.total} onChange={(key, value) => setState((s) => ({ ...s, summon: { ...s.summon, total: { ...s.summon.total, [key]: value } } }))} /></div>
               <div className="summon-result"><h3>查表拆分</h3><p className="summon-progress">修炼等级：{state.summon.level} 级 · 第 {state.summon.enhance} 次强化</p><p>修炼：生命 {formatNumber(result.summon.cultivate.hp, 0)} · 攻击 {formatNumber(result.summon.cultivate.atk, 0)} · 防御 {formatNumber(result.summon.cultivate.def, 0)}</p><p>进阶：生命 {formatNumber(result.summon.advance.hp, 0)} · 攻击 {formatNumber(result.summon.advance.atk, 0)} · 防御 {formatNumber(result.summon.advance.def, 0)}</p></div></div>
-            <BreakdownStrip data={result.sections.summoning} />
+            <div className="summon-power-grid">
+              <SummonPowerCard title="修炼总战力" badge="吃收集加成" data={result.summon.cultivatePower} tone="cultivate" />
+              <SummonPowerCard title="进阶总战力" badge="不吃收集加成" data={result.summon.advancePower} tone="advance" />
+              <article className="summon-grand-total">
+                <span>通灵总战力（修炼 + 进阶）</span>
+                <strong>{formatNumber(result.sections.summoning.total)}</strong>
+                <p>{formatNumber(result.summon.cultivatePower.total)} + {formatNumber(result.summon.advancePower.total)}</p>
+              </article>
+            </div>
           </SectionCard>
 
           <section id="tools" className="section-card tone-blue">

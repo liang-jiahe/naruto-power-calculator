@@ -176,10 +176,9 @@ export function calculateAll(state: CalculatorState): CalculationResult {
     atk: Math.max(0, finite(state.summon.total.atk) - summonLookup.stats.atk),
     def: Math.max(0, finite(state.summon.total.def) - summonLookup.stats.def),
   }
-  sections.summoning = combineBreakdowns(
-    calculateCore(summonLookup.stats, bonuses, true),
-    calculateCore(advance, bonuses, false),
-  )
+  const cultivatePower = calculateCore(summonLookup.stats, bonuses, true)
+  const advancePower = calculateCore(advance, bonuses, false)
+  sections.summoning = combineBreakdowns(cultivatePower, advancePower)
 
   const runeResults: Record<string, RuneResonance> = {}
   let runeDirect = 0
@@ -236,6 +235,8 @@ export function calculateAll(state: CalculatorState): CalculationResult {
     summon: {
       cultivate: summonLookup.stats,
       advance,
+      cultivatePower,
+      advancePower,
       maxLevel: summonLookup.maxLevel,
     },
     runes: runeResults,

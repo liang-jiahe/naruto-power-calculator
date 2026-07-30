@@ -73,6 +73,27 @@ describe('组合计算', () => {
     expect(calculateAll(state).summon.advance).toEqual({ hp: 0, atk: 0, def: 0 })
   })
 
+  it('通灵总战力完整拆分为吃收集的修炼战力与不吃收集的进阶战力', () => {
+    const state = initialState()
+    state.bonuses = { collectionPct: 20.3, hpPct: 0, atkPct: 7.4, defPct: 0 }
+    state.summon = {
+      beast: '蜘蛛',
+      level: 588,
+      enhance: 0,
+      total: { hp: 1_023_433, atk: 305_348, def: 88_610 },
+    }
+
+    const result = calculateAll(state)
+    expect(result.summon.cultivate).toEqual({ hp: 462_355, atk: 129_706, def: 39_905 })
+    expect(result.summon.advance).toEqual({ hp: 561_078, atk: 175_642, def: 48_705 })
+    expect(result.summon.cultivatePower.total).toBeCloseTo(1_666_026.02, 2)
+    expect(result.summon.advancePower.total).toBe(1_740_803)
+    expect(result.sections.summoning.total).toBeCloseTo(
+      result.summon.cultivatePower.total + result.summon.advancePower.total,
+      10,
+    )
+  })
+
   it('直接战力进入总战力但不进入面板属性', () => {
     const state = initialState()
     state.level = 171

@@ -111,6 +111,8 @@ export interface CalculationResult {
   summon: {
     cultivate: CoreStats
     advance: CoreStats
+    cultivatePower: PowerBreakdown
+    advancePower: PowerBreakdown
     maxLevel: number
   }
   runes: Record<string, RuneResonance>
