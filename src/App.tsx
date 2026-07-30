@@ -3,6 +3,7 @@ import {
   BarChart3,
   BookOpenText,
   Cat,
+  Clock3,
   ChevronRight,
   CircleHelp,
   Download,
@@ -31,6 +32,7 @@ import {
   SectionCard,
 } from './components'
 import { ThemedSelect } from './ThemedSelect'
+import { UpgradeCalculator } from './upgrade/UpgradeCalculator'
 import { SUMMON_DATA } from './domain/data'
 import { calculateAll } from './domain/engine'
 import { buildFormulaText, resolveModuleFormulas } from './domain/formulas'
@@ -158,6 +160,9 @@ function SummonPowerCard({
 function App() {
   const [state, setState] = useState<CalculatorState>(loadState)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [activeWorkspace, setActiveWorkspace] = useState<'power' | 'upgrade'>('power')
+  const [powerNavOpen, setPowerNavOpen] = useState(true)
+  const [upgradeResetSignal, setUpgradeResetSignal] = useState(0)
   const [toast, setToast] = useState('已载入本机数据')
   const fileInput = useRef<HTMLInputElement>(null)
   const result = useMemo(() => calculateAll(state), [state])
@@ -229,10 +234,28 @@ function App() {
   }
 
   const reset = () => {
-    if (!window.confirm('确定清空全部输入并恢复默认值吗？')) return
-    localStorage.removeItem(STORAGE_KEY)
-    setState(initialState())
-    setToast('已恢复默认值')
+    const label = activeWorkspace === 'power' ? '战力计算器' : '升级时间计算'
+    if (!window.confirm(`确定清空${label}的全部输入并恢复默认值吗？`)) return
+    if (activeWorkspace === 'power') {
+      localStorage.removeItem(STORAGE_KEY)
+      setState(initialState())
+      setToast('战力计算器已恢复默认值')
+    } else {
+      setUpgradeResetSignal((current) => current + 1)
+      setToast('升级时间计算已恢复默认值')
+    }
+  }
+
+  const scrollToSection = (id: string) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }))
+    })
+  }
+
+  const switchWorkspace = (workspace: 'power' | 'upgrade', target?: string) => {
+    setActiveWorkspace(workspace)
+    setMenuOpen(false)
+    scrollToSection(target ?? (workspace === 'power' ? 'overview' : 'upgrade-top'))
   }
 
   const chartData = Object.entries(result.sections)
@@ -253,11 +276,41 @@ function App() {
           <button onClick={() => setMenuOpen(false)} className="sidebar-close" aria-label="关闭导航"><X size={20} /></button>
         </div>
         <nav aria-label="页面导航">
-          {navItems.map(([id, label]) => (
-            <a key={id} href={`#${id}`} onClick={() => setMenuOpen(false)}>
-              <ChevronRight size={14} /><span>{label}</span>
-            </a>
-          ))}
+          <button
+            className={activeWorkspace === 'power' ? 'nav-group-trigger active' : 'nav-group-trigger'}
+            type="button"
+            aria-expanded={powerNavOpen}
+            aria-controls="power-nav-items"
+            onClick={() => setPowerNavOpen((current) => !current)}
+          >
+            <span><BarChart3 size={15} />战力计算器</span>
+            <ChevronRight className={powerNavOpen ? 'nav-arrow open' : 'nav-arrow'} size={15} />
+          </button>
+          <div className="nav-subitems" id="power-nav-items" hidden={!powerNavOpen}>
+            {navItems.map(([id, label]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={(event) => {
+                  if (activeWorkspace !== 'power') {
+                    event.preventDefault()
+                    switchWorkspace('power', id)
+                  } else {
+                    setMenuOpen(false)
+                  }
+                }}
+              >
+                <ChevronRight size={13} /><span>{label}</span>
+              </a>
+            ))}
+          </div>
+          <button
+            className={activeWorkspace === 'upgrade' ? 'workspace-nav-button active' : 'workspace-nav-button'}
+            type="button"
+            onClick={() => switchWorkspace('upgrade')}
+          >
+            <Clock3 size={15} /><span>升级时间计算</span>
+          </button>
         </nav>
         <img
           className="sidebar-cat-sticker"
@@ -273,7 +326,10 @@ function App() {
 
       <main>
         <header className="topbar">
-          <div className="save-state"><Save size={15} />{toast || '本机自动保存已开启'}</div>
+          <div className="save-state">
+            <Save size={15} />
+            {activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : '升级配置仅在本次会话保留'}
+          </div>
           <div className="toolbar">
             <button onClick={exportJson} disabled title="暂未开放"><Download size={16} />导出数据</button>
             <button onClick={() => fileInput.current?.click()} disabled title="暂未开放"><Upload size={16} />导入</button>
@@ -290,7 +346,7 @@ function App() {
           </div>
         </header>
 
-        <div className="content">
+        <div className="content workspace-view" hidden={activeWorkspace !== 'power'}>
           <section className="hero" id="overview">
             <img
               className="hero-cat-sticker"
@@ -479,13 +535,28 @@ function App() {
 
           <footer><BookOpenText size={17} /><p>本工具为非官方同人计算项目，仅供数据分析与交流，不代表游戏官方规则或数值承诺。</p></footer>
         </div>
+        <div className="workspace-view" hidden={activeWorkspace !== 'upgrade'}>
+          <UpgradeCalculator resetSignal={upgradeResetSignal} />
+        </div>
       </main>
       <nav className="mobile-bottom-nav" aria-label="手机端主导航">
-        <a href="#overview"><House size={20} /><span>首页</span></a>
-        <a href="#collection"><BarChart3 size={20} /><span>统计</span></a>
-        <a className="mobile-fab" href="#overview" aria-label="综合战力"><Cat size={27} /></a>
-        <a href="#tools"><Sparkles size={20} /><span>忍具</span></a>
-        <a href="#accessories"><ShieldCheck size={20} /><span>符文</span></a>
+        {activeWorkspace === 'power' ? (
+          <>
+            <button type="button" onClick={() => switchWorkspace('upgrade')}><Clock3 size={20} /><span>升级</span></button>
+            <button type="button" onClick={() => scrollToSection('collection')}><BarChart3 size={20} /><span>收集</span></button>
+            <button className="mobile-fab" type="button" aria-label="战力总览" onClick={() => scrollToSection('overview')}><Cat size={27} /></button>
+            <button type="button" onClick={() => scrollToSection('tools')}><Sparkles size={20} /><span>忍具</span></button>
+            <button type="button" onClick={() => scrollToSection('accessories')}><ShieldCheck size={20} /><span>符文</span></button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={() => switchWorkspace('power')}><House size={20} /><span>战力</span></button>
+            <button type="button" onClick={() => scrollToSection('upgrade-results')}><BarChart3 size={20} /><span>结果</span></button>
+            <button className="mobile-fab" type="button" aria-label="升级时间计算顶部" onClick={() => scrollToSection('upgrade-top')}><Cat size={27} /></button>
+            <button type="button" onClick={() => scrollToSection('upgrade-reference')}><BookOpenText size={20} /><span>经验表</span></button>
+            <button type="button" onClick={() => scrollToSection('upgrade-top')}><Clock3 size={20} /><span>升级</span></button>
+          </>
+        )}
       </nav>
     </div>
   )
