@@ -29,6 +29,7 @@ import {
   NumberField,
   SectionCard,
 } from './components'
+import { ThemedSelect } from './ThemedSelect'
 import { SUMMON_DATA } from './domain/data'
 import { calculateAll } from './domain/engine'
 import { FORMULA_TEXT } from './domain/formulas'
@@ -123,6 +124,8 @@ const downloadText = (name: string, content: string, type: string) => {
   link.click()
   URL.revokeObjectURL(url)
 }
+
+const stickerAsset = (name: string) => `${import.meta.env.BASE_URL}stickers/${name}`
 
 function App() {
   const [state, setState] = useState<CalculatorState>(loadState)
@@ -227,6 +230,12 @@ function App() {
             </a>
           ))}
         </nav>
+        <img
+          className="sidebar-cat-sticker"
+          src={stickerAsset('sleep-cat.png')}
+          alt=""
+          aria-hidden="true"
+        />
         <div className="sidebar-note">
           <ShieldCheck size={17} />
           <p>数据仅保存在当前浏览器。本工具为非官方同人项目。</p>
@@ -250,6 +259,12 @@ function App() {
 
         <div className="content">
           <section className="hero" id="overview">
+            <img
+              className="hero-cat-sticker"
+              src={stickerAsset('calculator-cat.png')}
+              alt=""
+              aria-hidden="true"
+            />
             <div className="hero-copy">
               <span className="hero-kicker"><PawPrint size={15} />NEKO POWER LAB</span>
               <h1>把每一点属性，<br /><em>算得明明白白。</em></h1>
@@ -295,14 +310,25 @@ function App() {
           </section>
 
           <section id="collection" className="bonus-panel">
+            <img
+              className="peek-cat-sticker"
+              src={stickerAsset('peek-cat.png')}
+              alt=""
+              aria-hidden="true"
+            />
             <div><span className="eyebrow">GLOBAL BONUS</span><h2>忍者收集加成</h2><p>修改一次，全页面所有计算立即联动。</p></div>
             <div className="bonus-fields">
-              <label className="field"><span>全收集档位</span><div className="input-shell">
-                <select value={state.bonuses.collectionPct} onChange={(e) => setState((s) => ({ ...s, bonuses: { ...s.bonuses, collectionPct: Number(e.target.value) } }))}>
-                  <option value={20.3}>20.3% · 五星 S</option><option value={16.2}>16.2% · 四星 S / 五星 A</option>
-                  <option value={13}>13% · 四星 A</option><option value={12.2}>12.2% · 三星 S</option>
-                </select>
-              </div></label>
+              <ThemedSelect
+                label="全收集档位"
+                value={state.bonuses.collectionPct}
+                options={[
+                  { value: 20.3, label: '20.3% · 五星 S', hint: '最高收集倍率' },
+                  { value: 16.2, label: '16.2% · 四星 S / 五星 A' },
+                  { value: 13, label: '13% · 四星 A' },
+                  { value: 12.2, label: '12.2% · 三星 S' },
+                ]}
+                onChange={(collectionPct) => setState((s) => ({ ...s, bonuses: { ...s.bonuses, collectionPct } }))}
+              />
               {(['hpPct', 'atkPct', 'defPct'] as const).map((key) => (
                 <NumberField key={key} label={{ hpPct: '生命百分比', atkPct: '攻击百分比', defPct: '防御百分比' }[key]}
                   value={state.bonuses[key]} step={0.1} suffix="%"
@@ -360,9 +386,19 @@ function App() {
 
           <SectionCard id="summoning" eyebrow="SUMMON" title="通灵" description="修炼属性由通灵兽、等级与强化次数查表；进阶属性由总面板扣除修炼值。" value={result.sections.summoning.total}>
             <div className="summon-selects">
-              <label className="field"><span>通灵兽</span><div className="input-shell"><select value={state.summon.beast} onChange={(e) => setState((s) => ({ ...s, summon: { ...s.summon, beast: e.target.value, level: Math.min(s.summon.level, SUMMON_DATA[e.target.value].length) } }))}>{Object.keys(SUMMON_DATA).map((name) => <option key={name}>{name}</option>)}</select></div></label>
+              <ThemedSelect
+                label="通灵兽"
+                value={state.summon.beast}
+                options={Object.keys(SUMMON_DATA).map((name) => ({ value: name, label: name }))}
+                onChange={(beast) => setState((s) => ({ ...s, summon: { ...s.summon, beast, level: Math.min(s.summon.level, SUMMON_DATA[beast].length) } }))}
+              />
               <NumberField label={`等级（最高 ${result.summon.maxLevel}）`} value={state.summon.level} min={1} max={result.summon.maxLevel} onChange={(level) => setState((s) => ({ ...s, summon: { ...s.summon, level: Math.trunc(level) } }))} />
-              <label className="field"><span>强化次数</span><div className="input-shell"><select value={state.summon.enhance} onChange={(e) => setState((s) => ({ ...s, summon: { ...s.summon, enhance: Number(e.target.value) } }))}>{[0,1,2,3,4].map((value) => <option value={value} key={value}>第 {value} 次</option>)}</select></div></label>
+              <ThemedSelect
+                label="强化次数"
+                value={state.summon.enhance}
+                options={[0, 1, 2, 3, 4].map((value) => ({ value, label: `第 ${value} 次` }))}
+                onChange={(enhance) => setState((s) => ({ ...s, summon: { ...s.summon, enhance } }))}
+              />
             </div>
             <div className="split-editor"><div><h3>输入通灵总面板</h3><CoreEditor value={state.summon.total} onChange={(key, value) => setState((s) => ({ ...s, summon: { ...s.summon, total: { ...s.summon.total, [key]: value } } }))} /></div>
               <div className="summon-result"><h3>查表拆分</h3><p>修炼：生命 {formatNumber(result.summon.cultivate.hp, 0)} · 攻击 {formatNumber(result.summon.cultivate.atk, 0)} · 防御 {formatNumber(result.summon.cultivate.def, 0)}</p><p>进阶：生命 {formatNumber(result.summon.advance.hp, 0)} · 攻击 {formatNumber(result.summon.advance.atk, 0)} · 防御 {formatNumber(result.summon.advance.def, 0)}</p></div></div>
