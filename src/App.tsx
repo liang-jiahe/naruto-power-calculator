@@ -2,12 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   BarChart3,
   BookOpenText,
+  Cat,
   ChevronRight,
   CircleHelp,
   Download,
   FileDown,
-  Flame,
+  House,
   Menu,
+  PawPrint,
   Printer,
   RotateCcw,
   Save,
@@ -214,8 +216,8 @@ function App() {
       {menuOpen && <button className="sidebar-overlay" aria-label="关闭导航" onClick={() => setMenuOpen(false)} />}
       <aside className={menuOpen ? 'sidebar open' : 'sidebar'}>
         <div className="brand">
-          <div className="brand-mark"><Flame size={24} /></div>
-          <div><strong>忍界战力</strong><span>POWER LAB · V1</span></div>
+          <div className="brand-mark"><Cat size={25} /></div>
+          <div><strong>NekoPower</strong><span>忍界战力实验室 · V1</span></div>
           <button onClick={() => setMenuOpen(false)} className="sidebar-close" aria-label="关闭导航"><X size={20} /></button>
         </div>
         <nav aria-label="页面导航">
@@ -249,7 +251,7 @@ function App() {
         <div className="content">
           <section className="hero" id="overview">
             <div className="hero-copy">
-              <span className="hero-kicker"><Sparkles size={15} />忍界数据工坊</span>
+              <span className="hero-kicker"><PawPrint size={15} />NEKO POWER LAB</span>
               <h1>把每一点属性，<br /><em>算得明明白白。</em></h1>
               <p>完整拆解等级、装备、忍具、通灵与符文收益。所有算法在本机执行，实时联动，不上传数据。</p>
               <div className="hero-pills"><span>16 个战力模块</span><span>精确到 0.01</span><span>离线可用</span></div>
@@ -395,6 +397,13 @@ function App() {
           <footer><BookOpenText size={17} /><p>本工具为非官方同人计算项目，仅供数据分析与交流，不代表游戏官方规则或数值承诺。</p></footer>
         </div>
       </main>
+      <nav className="mobile-bottom-nav" aria-label="手机端主导航">
+        <a href="#overview"><House size={20} /><span>首页</span></a>
+        <a href="#collection"><BarChart3 size={20} /><span>统计</span></a>
+        <a className="mobile-fab" href="#overview" aria-label="综合战力"><Cat size={27} /></a>
+        <a href="#tools"><Sparkles size={20} /><span>忍具</span></a>
+        <a href="#accessories"><ShieldCheck size={20} /><span>符文</span></a>
+      </nav>
     </div>
   )
 }

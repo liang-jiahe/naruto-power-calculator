@@ -56,12 +56,13 @@ export function calculateAttributes(
   stats: AttributeStats,
   bonuses: BonusConfig,
   withCollection: boolean,
+  includeElements = true,
 ): PowerBreakdown {
   const result = calculateCore(stats, bonuses, withCollection)
   result.crit = finite(stats.crit) * COEFFICIENTS.crit
   result.antiCrit = finite(stats.antiCrit) * COEFFICIENTS.antiCrit
-  result.elementAtk = sumElements(stats.elementAtk) * COEFFICIENTS.elementAtk
-  result.elementDef = sumElements(stats.elementDef) * COEFFICIENTS.elementDef
+  result.elementAtk = includeElements ? sumElements(stats.elementAtk) * COEFFICIENTS.elementAtk : 0
+  result.elementDef = includeElements ? sumElements(stats.elementDef) * COEFFICIENTS.elementDef : 0
   result.total += result.crit + result.antiCrit + result.elementAtk + result.elementDef
   return result
 }
@@ -194,13 +195,13 @@ export function calculateAll(state: CalculatorState): CalculationResult {
     }
   }
   sections.accessories = combineBreakdowns(
-    calculateAttributes(state.accessories.stats, bonuses, true),
+    calculateAttributes(state.accessories.stats, bonuses, true, false),
     calculateCore(resonance, bonuses, true),
     directPower(runeDirect),
   )
 
   sections.toolPanel = calculateAttributes(state.tools.panel, bonuses, true)
-  sections.toolReforge = calculateAttributes(state.tools.reforge, bonuses, false)
+  sections.toolReforge = calculateAttributes(state.tools.reforge, bonuses, false, false)
   sections.toolMuseum =
     state.tools.museumMode === 'direct'
       ? directPower(state.tools.museumDirectPower)
