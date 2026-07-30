@@ -36,7 +36,7 @@ import { UpgradeCalculator } from './upgrade/UpgradeCalculator'
 import { SUMMON_DATA } from './domain/data'
 import { calculateAll } from './domain/engine'
 import { buildFormulaText, resolveModuleFormulas } from './domain/formulas'
-import { exportPayload, initialState, parsePayload, RUNE_SLOTS, sanitizeState, STORAGE_KEY } from './domain/state'
+import { initialState, parsePayload, RUNE_SLOTS, sanitizeState, STORAGE_KEY } from './domain/state'
 import type {
   AttributeStats,
   CalculatorState,
@@ -211,13 +211,9 @@ function App() {
       })),
   })
 
-  const exportJson = () => {
-    downloadText(
-      `火影战力数据_${new Date().toISOString().slice(0, 10)}.json`,
-      JSON.stringify(exportPayload(state), null, 2),
-      'application/json;charset=utf-8',
-    )
-    setToast('数据文件已导出')
+  const exportPdf = () => {
+    setToast('正在打开 PDF 导出窗口…')
+    window.print()
   }
 
   const importJson = async (file?: File) => {
@@ -331,7 +327,7 @@ function App() {
             {activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : '升级配置仅在本次会话保留'}
           </div>
           <div className="toolbar">
-            <button onClick={exportJson} title="导出战力计算器 JSON 数据"><Download size={16} />导出数据</button>
+            <button onClick={exportPdf} title="打印或另存为 PDF 文本报告"><Download size={16} />导出 PDF</button>
             <button onClick={() => fileInput.current?.click()} disabled title="暂未开放"><Upload size={16} />导入</button>
             <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')} disabled title="暂未开放">
               <FileDown size={16} />公式
