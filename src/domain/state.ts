@@ -140,7 +140,7 @@ export function sanitizeState(value: unknown): CalculatorState {
 
 export function exportPayload(state: CalculatorState) {
   return {
-    app: '忍界战力计算器',
+    app: '火影战力计算器',
     version: STATE_VERSION,
     savedAt: new Date().toISOString(),
     state,

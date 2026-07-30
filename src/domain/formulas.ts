@@ -215,7 +215,7 @@ export function resolveModuleFormulas(
 export function buildFormulaText(
   formulas: Record<keyof typeof MODULE_FORMULAS, FormulaSpec> = MODULE_FORMULAS,
 ) {
-  return `忍界战力计算器 · V1 公式说明
+  return `火影战力计算器 · V1 公式说明
 
 基础系数
 生命（原值计入）

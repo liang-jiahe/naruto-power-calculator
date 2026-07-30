@@ -208,7 +208,7 @@ function App() {
 
   const exportJson = () => {
     downloadText(
-      `忍界战力数据_${new Date().toISOString().slice(0, 10)}.json`,
+      `火影战力数据_${new Date().toISOString().slice(0, 10)}.json`,
       JSON.stringify(exportPayload(state), null, 2),
       'application/json;charset=utf-8',
     )
@@ -249,7 +249,7 @@ function App() {
       <aside className={menuOpen ? 'sidebar open' : 'sidebar'}>
         <div className="brand">
           <div className="brand-mark"><Cat size={25} /></div>
-          <div><strong>NekoPower</strong><span>忍界战力实验室 · V1</span></div>
+          <div><strong>火影战力计算器</strong><span>NEKO POWER LAB · V1</span></div>
           <button onClick={() => setMenuOpen(false)} className="sidebar-close" aria-label="关闭导航"><X size={20} /></button>
         </div>
         <nav aria-label="页面导航">
@@ -277,7 +277,7 @@ function App() {
           <div className="toolbar">
             <button onClick={exportJson}><Download size={16} />导出数据</button>
             <button onClick={() => fileInput.current?.click()}><Upload size={16} />导入</button>
-            <button onClick={() => downloadText('忍界战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')}>
+            <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')}>
               <FileDown size={16} />公式
             </button>
             <button onClick={() => window.print()}><Printer size={16} />PDF</button>
@@ -299,7 +299,10 @@ function App() {
               aria-hidden="true"
             />
             <div className="hero-copy">
-              <span className="hero-kicker"><PawPrint size={15} />NEKO POWER LAB</span>
+              <div className="hero-brandline">
+                <span className="hero-kicker"><PawPrint size={15} />火影战力计算器</span>
+                <span className="hero-byline" aria-label="繁星の猫猫星 制作"><Cat size={14} />繁星の猫猫星 制作</span>
+              </div>
               <h1>把每一点属性，<br /><em>算得明明白白。</em></h1>
               <p>完整拆解等级、装备、忍具、通灵与符文收益。所有算法在本机执行，实时联动，不上传数据。</p>
               <div className="hero-pills"><span>16 个战力模块</span><span>精确到 0.01</span><span>离线可用</span></div>
