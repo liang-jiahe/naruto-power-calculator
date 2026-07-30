@@ -54,4 +54,13 @@ describe('双板块导航与状态', () => {
     expect(screen.getByText('升级进度表')).toBeVisible()
     expect(screen.getByText('查看 140—170 级原始经验表')).toBeVisible()
   })
+
+  it('仅启用 JSON 数据导出，其他工具按钮保持禁用', () => {
+    render(<App />)
+
+    expect(screen.getByRole('button', { name: '导出数据' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '导入' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '公式' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'PDF' })).toBeDisabled()
+  })
 })

@@ -331,7 +331,7 @@ function App() {
             {activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : '升级配置仅在本次会话保留'}
           </div>
           <div className="toolbar">
-            <button onClick={exportJson} disabled title="暂未开放"><Download size={16} />导出数据</button>
+            <button onClick={exportJson} title="导出战力计算器 JSON 数据"><Download size={16} />导出数据</button>
             <button onClick={() => fileInput.current?.click()} disabled title="暂未开放"><Upload size={16} />导入</button>
             <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')} disabled title="暂未开放">
               <FileDown size={16} />公式
