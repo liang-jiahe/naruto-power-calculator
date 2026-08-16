@@ -26,8 +26,6 @@ export interface UpgradeConfig {
   superKage: boolean
   staminaBodies: StaminaBodies
   otherWeeklyStamina: number
-  weeklyPack: boolean
-  packOffset: number
   startDate: string
 }
 
@@ -184,9 +182,6 @@ function validateConfig(config: UpgradeConfig) {
   if (!Number.isFinite(config.otherWeeklyStamina) || config.otherWeeklyStamina < 0) {
     throw new Error('其他每周体力必须是非负有限数字。')
   }
-  if (!Number.isInteger(config.packOffset) || config.packOffset < 0 || config.packOffset > 6) {
-    throw new Error('距离下次礼包必须在 0 到 6 天之间。')
-  }
   return parseUpgradeDate(config.startDate)
 }
 
@@ -224,7 +219,7 @@ export function simulateUpgrade(config: LegacyUpgradeConfig, maxDays = MAX_SIMUL
   }
 
   const totals = { dungeonExp: 0, activeExp: 0, bountyExp: 0, eliteRuns: 0, shuraRuns: 0 }
-  const averageDailyStamina = baseStamina + (normalized.weeklyPack ? 150 / 7 : 0)
+  const averageDailyStamina = baseStamina
   const preciseDays = milestones.reduce((total, milestone) => {
     const row = getUpgradeLevelData(milestone.fromLevel)
     if (!row) throw new Error(`缺少 ${milestone.fromLevel} 级收益数据。`)
@@ -270,11 +265,7 @@ export function simulateUpgrade(config: LegacyUpgradeConfig, maxDays = MAX_SIMUL
 
   while (level < normalized.targetLevel && dayIndex < maxDays) {
     const date = addDays(startDate, dayIndex)
-    const packDue =
-      normalized.weeklyPack &&
-      dayIndex >= normalized.packOffset &&
-      (dayIndex - normalized.packOffset) % 7 === 0
-    const addedStamina = baseStamina + (packDue ? 150 : 0)
+    const addedStamina = baseStamina
     stamina += addedStamina
 
     let eliteRunsToday = 0

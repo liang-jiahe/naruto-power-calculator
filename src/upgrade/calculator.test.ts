@@ -15,8 +15,6 @@ const baseConfig: UpgradeConfig = {
   superKage: false,
   staminaBodies: 3,
   otherWeeklyStamina: 0,
-  weeklyPack: false,
-  packOffset: 0,
   startDate: '2026-07-29',
 }
 
@@ -66,13 +64,6 @@ describe('逐日升级推演', () => {
       shuraRuns: shura,
       remainingStamina: remaining,
     })
-  })
-
-  it('每周礼包按偏移日加入 150 体力', () => {
-    const today = simulateUpgrade({ ...baseConfig, weeklyPack: true, packOffset: 0 }).firstDay
-    const tomorrow = simulateUpgrade({ ...baseConfig, weeklyPack: true, packOffset: 1 }).firstDay
-    expect(today?.addedStamina).toBe(740)
-    expect(tomorrow?.addedStamina).toBe(590)
   })
 
   it('按平均每日收益给出两位小数所需天数', () => {
@@ -126,7 +117,6 @@ describe('逐日升级推演', () => {
     expect(() => simulateUpgrade({ ...baseConfig, currentExp: getUpgradeLevelData(140)?.expNeeded ?? 0 })).toThrow(
       '当前经验应在',
     )
-    expect(() => simulateUpgrade({ ...baseConfig, packOffset: 7 })).toThrow('0 到 6')
     expect(() => simulateUpgrade({ ...baseConfig, otherWeeklyStamina: -1 })).toThrow('其他每周体力')
   })
 

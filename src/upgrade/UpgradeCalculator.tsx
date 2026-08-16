@@ -51,8 +51,6 @@ const createDefaultConfig = (): UpgradeConfig => ({
   superKage: false,
   staminaBodies: 3,
   otherWeeklyStamina: 500,
-  weeklyPack: true,
-  packOffset: 0,
   startDate: localDateInputValue(),
 })
 
@@ -209,28 +207,6 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
               V 特权、心悦和活动等其他来源；按每周总量 ÷ 7 平均计入每日体力。
             </p>
 
-            <label className="upgrade-toggle">
-              <span><b>每周体力礼包</b><small>每 7 天领取 150 体力</small></span>
-              <input
-                type="checkbox"
-                checked={form.weeklyPack}
-                onChange={(event) => update('weeklyPack', event.target.checked)}
-              />
-              <i aria-hidden="true" />
-            </label>
-
-            {form.weeklyPack && (
-              <ThemedSelect
-                label="距离下次礼包"
-                value={form.packOffset}
-                options={Array.from({ length: 7 }, (_, index) => ({
-                  value: index,
-                  label: index === 0 ? '今天可领' : `${index} 天后可领`,
-                }))}
-                onChange={(packOffset) => update('packOffset', packOffset)}
-              />
-            )}
-
             <div className="upgrade-stamina-strip">
               <span>每日固定体力</span>
               <strong>{formatInteger(baseStamina)}</strong>
@@ -281,7 +257,7 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
             <article className="upgrade-summary pink">
               <span>每日基础体力</span>
               <strong>{formatInteger(result.baseStamina)}</strong>
-              <p>{submitted.weeklyPack ? '另含每周 150 礼包' : '未计每周礼包'}</p>
+              <p>{submitted.otherWeeklyStamina ? '已含其他每周体力日均' : '不含其他每周体力'}</p>
             </article>
           </div>
 
