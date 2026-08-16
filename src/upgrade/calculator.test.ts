@@ -14,6 +14,7 @@ const baseConfig: UpgradeConfig = {
   vipLevel: 10,
   superKage: false,
   staminaBodies: 3,
+  otherWeeklyStamina: 0,
   weeklyPack: false,
   packOffset: 0,
   startDate: '2026-07-29',
@@ -31,23 +32,32 @@ describe('升级经验数据', () => {
     expect(totalRemainingExperience(140, 35_498, 142)).toBe(10_000_000 + 11_035_498)
     expect(totalRemainingExperience(150, 123, 150)).toBe(0)
   })
+
+  it('141 级收益与参考计算器一致', () => {
+    expect(getUpgradeLevelData(141)).toMatchObject({
+      bounty: 95_139,
+      activeTotal: 76_517,
+      normalExp: 803,
+      shuraExp: 4_282,
+    })
+  })
 })
 
 describe('逐日升级推演', () => {
-  it('叠加 V 等级和超影丰饶加成并向下取整', () => {
-    expect(simulateUpgrade(baseConfig).firstDay?.bountyExp).toBe(Math.floor(73_410 * 1.2))
-    expect(simulateUpgrade({ ...baseConfig, vipLevel: 14 }).firstDay?.bountyExp).toBe(Math.floor(73_410 * 1.3))
-    expect(simulateUpgrade({ ...baseConfig, superKage: true }).firstDay?.bountyExp).toBe(Math.floor(73_410 * 1.5))
+  it('叠加 V 等级和超影丰饶加成并四舍五入', () => {
+    expect(simulateUpgrade(baseConfig).firstDay?.bountyExp).toBe(Math.round(73_410 * 1.2))
+    expect(simulateUpgrade({ ...baseConfig, vipLevel: 14 }).firstDay?.bountyExp).toBe(Math.round(73_410 * 1.3))
+    expect(simulateUpgrade({ ...baseConfig, superKage: true }).firstDay?.bountyExp).toBe(Math.round(73_410 * 1.5))
     expect(simulateUpgrade({ ...baseConfig, vipLevel: 14, superKage: true }).firstDay?.bountyExp).toBe(
-      Math.floor(73_410 * 1.6),
+      Math.round(73_410 * 1.6),
     )
   })
 
   it.each([
-    [0, 438, 43, 0, 8],
-    [3, 588, 58, 0, 8],
-    [6, 738, 65, 4, 8],
-    [9, 888, 65, 11, 18],
+    [0, 440, 44, 0, 0],
+    [3, 590, 59, 0, 0],
+    [6, 740, 74, 0, 0],
+    [9, 890, 75, 7, 0],
   ] as const)('每日 %i 体时优先精英再刷修罗', (staminaBodies, stamina, elite, shura, remaining) => {
     const day = simulateUpgrade({ ...baseConfig, staminaBodies }).firstDay
     expect(day).toMatchObject({
@@ -61,8 +71,25 @@ describe('逐日升级推演', () => {
   it('每周礼包按偏移日加入 150 体力', () => {
     const today = simulateUpgrade({ ...baseConfig, weeklyPack: true, packOffset: 0 }).firstDay
     const tomorrow = simulateUpgrade({ ...baseConfig, weeklyPack: true, packOffset: 1 }).firstDay
-    expect(today?.addedStamina).toBe(738)
-    expect(tomorrow?.addedStamina).toBe(588)
+    expect(today?.addedStamina).toBe(740)
+    expect(tomorrow?.addedStamina).toBe(590)
+  })
+
+  it('按平均每日收益给出两位小数所需天数', () => {
+    const result = simulateUpgrade({
+      ...baseConfig,
+      currentLevel: 141,
+      targetLevel: 142,
+      otherWeeklyStamina: 500,
+    })
+    expect(result.preciseDays).toBeCloseTo(37.1679, 4)
+    expect(result.days).toBe(38)
+  })
+
+  it('其他每周体力按七日平均计入每日基础体力', () => {
+    const result = simulateUpgrade({ ...baseConfig, otherWeeklyStamina: 500 })
+    expect(result.baseStamina).toBeCloseTo(590 + 500 / 7)
+    expect(result.firstDay?.addedStamina).toBeCloseTo(590 + 500 / 7)
   })
 
   it('只差一点经验时当天完成', () => {
@@ -72,8 +99,12 @@ describe('逐日升级推演', () => {
   })
 
   it('兼容未提供买体选项的旧配置并默认三体', () => {
-    const { staminaBodies: _staminaBodies, ...legacy } = baseConfig
-    expect(simulateUpgrade(legacy).firstDay?.addedStamina).toBe(588)
+    const {
+      staminaBodies: _staminaBodies,
+      otherWeeklyStamina: _otherWeeklyStamina,
+      ...legacy
+    } = baseConfig
+    expect(simulateUpgrade(legacy).firstDay?.addedStamina).toBe(590)
   })
 
   it('当前等级等于目标等级时返回零天', () => {
@@ -96,6 +127,7 @@ describe('逐日升级推演', () => {
       '当前经验应在',
     )
     expect(() => simulateUpgrade({ ...baseConfig, packOffset: 7 })).toThrow('0 到 6')
+    expect(() => simulateUpgrade({ ...baseConfig, otherWeeklyStamina: -1 })).toThrow('其他每周体力')
   })
 
   it('超过逐日推演安全上限时停止计算', () => {

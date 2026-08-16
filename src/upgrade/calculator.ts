@@ -9,6 +9,15 @@ export interface UpgradeLevelRow {
 
 export type StaminaBodies = 0 | 3 | 6 | 9
 
+export const DAILY_STAMINA_SOURCES = {
+  natural: 240,
+  ramen: 150,
+  friendGift: 50,
+} as const
+
+export const BASE_DAILY_STAMINA =
+  DAILY_STAMINA_SOURCES.natural + DAILY_STAMINA_SOURCES.ramen + DAILY_STAMINA_SOURCES.friendGift
+
 export interface UpgradeConfig {
   currentLevel: number
   currentExp: number
@@ -16,6 +25,7 @@ export interface UpgradeConfig {
   vipLevel: number
   superKage: boolean
   staminaBodies: StaminaBodies
+  otherWeeklyStamina: number
   weeklyPack: boolean
   packOffset: number
   startDate: string
@@ -43,6 +53,7 @@ export interface UpgradeDaySummary {
 
 export interface UpgradeResult {
   days: number
+  preciseDays: number
   completionDate: Date
   baseStamina: number
   remainingStamina: number
@@ -59,7 +70,7 @@ export interface UpgradeResult {
 
 export const UPGRADE_LEVEL_DATA: readonly UpgradeLevelRow[] = [
   { level: 140, expNeeded: 10035498, bounty: 73410, activeTotal: 75074, normalExp: 788, shuraExp: 4200 },
-  { level: 141, expNeeded: 11035498, bounty: 75827, activeTotal: 76217, normalExp: 800, shuraExp: 4260 },
+  { level: 141, expNeeded: 11035498, bounty: 95139, activeTotal: 76517, normalExp: 803, shuraExp: 4282 },
   { level: 142, expNeeded: 12035498, bounty: 77533, activeTotal: 77914, normalExp: 818, shuraExp: 4360 },
   { level: 143, expNeeded: 13015782, bounty: 78955, activeTotal: 79342, normalExp: 833, shuraExp: 4440 },
   { level: 144, expNeeded: 15045458, bounty: 80566, activeTotal: 80980, normalExp: 850, shuraExp: 4532 },
@@ -94,6 +105,7 @@ export const UPGRADE_LEVEL_DATA: readonly UpgradeLevelRow[] = [
 const LEVEL_MAP = new Map(UPGRADE_LEVEL_DATA.map((row) => [row.level, row]))
 const VALID_STAMINA_BODIES = new Set<number>([0, 3, 6, 9])
 const MAX_SIMULATION_DAYS = 20_000
+const DAILY_ELITE_STAMINA_LIMIT = 750
 
 export const getUpgradeLevelData = (level: number) => LEVEL_MAP.get(level)
 
@@ -169,18 +181,32 @@ function validateConfig(config: UpgradeConfig) {
   if (!VALID_STAMINA_BODIES.has(config.staminaBodies)) {
     throw new Error('每日买体必须选择不买、三体、六体或九体。')
   }
+  if (!Number.isFinite(config.otherWeeklyStamina) || config.otherWeeklyStamina < 0) {
+    throw new Error('其他每周体力必须是非负有限数字。')
+  }
   if (!Number.isInteger(config.packOffset) || config.packOffset < 0 || config.packOffset > 6) {
     throw new Error('距离下次礼包必须在 0 到 6 天之间。')
   }
   return parseUpgradeDate(config.startDate)
 }
 
-type LegacyUpgradeConfig = Omit<UpgradeConfig, 'staminaBodies'> & { staminaBodies?: StaminaBodies }
+type LegacyUpgradeConfig = Omit<UpgradeConfig, 'staminaBodies' | 'otherWeeklyStamina'> & {
+  staminaBodies?: StaminaBodies
+  otherWeeklyStamina?: number
+}
 
 export function simulateUpgrade(config: LegacyUpgradeConfig, maxDays = MAX_SIMULATION_DAYS): UpgradeResult {
-  const normalized: UpgradeConfig = { ...config, staminaBodies: config.staminaBodies ?? 3 }
+  const normalized: UpgradeConfig = {
+    ...config,
+    staminaBodies: config.staminaBodies ?? 3,
+    otherWeeklyStamina: config.otherWeeklyStamina ?? 0,
+  }
   const startDate = validateConfig(normalized)
-  const baseStamina = 438 + (normalized.superKage ? 150 : 0) + normalized.staminaBodies * 50
+  const baseStamina =
+    BASE_DAILY_STAMINA +
+    (normalized.superKage ? 150 : 0) +
+    normalized.staminaBodies * 50 +
+    normalized.otherWeeklyStamina / 7
   const milestones: UpgradeMilestone[] = []
 
   for (let level = normalized.currentLevel; level < normalized.targetLevel; level += 1) {
@@ -198,9 +224,23 @@ export function simulateUpgrade(config: LegacyUpgradeConfig, maxDays = MAX_SIMUL
   }
 
   const totals = { dungeonExp: 0, activeExp: 0, bountyExp: 0, eliteRuns: 0, shuraRuns: 0 }
+  const averageDailyStamina = baseStamina + (normalized.weeklyPack ? 150 / 7 : 0)
+  const preciseDays = milestones.reduce((total, milestone) => {
+    const row = getUpgradeLevelData(milestone.fromLevel)
+    if (!row) throw new Error(`缺少 ${milestone.fromLevel} 级收益数据。`)
+    const eliteStamina = Math.min(averageDailyStamina, DAILY_ELITE_STAMINA_LIMIT)
+    const shuraStamina = Math.max(0, averageDailyStamina - DAILY_ELITE_STAMINA_LIMIT)
+    const dungeonExp = (eliteStamina / 10) * row.normalExp * 2 + (shuraStamina / 20) * row.shuraExp
+    const vipBonus = normalized.vipLevel >= 14 ? 0.3 : 0.2
+    const superBonus = normalized.superKage ? 0.3 : 0
+    const bountyExp = Math.round(row.bounty * (1 + vipBonus + superBonus))
+    return total + milestone.remaining / (dungeonExp + row.activeTotal + bountyExp)
+  }, 0)
+
   if (normalized.targetLevel === normalized.currentLevel) {
     return {
       days: 0,
+      preciseDays: 0,
       completionDate: startDate,
       baseStamina,
       remainingStamina: 0,
@@ -243,7 +283,7 @@ export function simulateUpgrade(config: LegacyUpgradeConfig, maxDays = MAX_SIMUL
     let activeExpToday = 0
     let bountyExpToday = 0
 
-    while (level < normalized.targetLevel && eliteRunsToday < 65 && stamina >= 10) {
+    while (level < normalized.targetLevel && eliteRunsToday < DAILY_ELITE_STAMINA_LIMIT / 10 && stamina >= 10) {
       const row = getUpgradeLevelData(level)
       if (!row) throw new Error(`缺少 ${level} 级精英副本经验。`)
       const reward = row.normalExp * 2
@@ -280,7 +320,7 @@ export function simulateUpgrade(config: LegacyUpgradeConfig, maxDays = MAX_SIMUL
       if (!row) throw new Error(`缺少 ${level} 级丰饶经验。`)
       const vipBonus = normalized.vipLevel >= 14 ? 0.3 : 0.2
       const superBonus = normalized.superKage ? 0.3 : 0
-      bountyExpToday = Math.floor(row.bounty * (1 + vipBonus + superBonus))
+      bountyExpToday = Math.round(row.bounty * (1 + vipBonus + superBonus))
       totals.bountyExp += bountyExpToday
       applyExperience(bountyExpToday, date)
     }
@@ -304,6 +344,7 @@ export function simulateUpgrade(config: LegacyUpgradeConfig, maxDays = MAX_SIMUL
 
   return {
     days: dayIndex,
+    preciseDays,
     completionDate: addDays(startDate, dayIndex - 1),
     baseStamina,
     remainingStamina: stamina,

@@ -13,6 +13,8 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { NumberField } from '../components'
 import { ThemedSelect } from '../ThemedSelect'
 import {
+  BASE_DAILY_STAMINA,
+  DAILY_STAMINA_SOURCES,
   UPGRADE_LEVEL_DATA,
   formatUpgradeDate,
   getUpgradeLevelData,
@@ -27,7 +29,7 @@ import './upgrade.css'
 const LEVELS = UPGRADE_LEVEL_DATA.map((item) => item.level)
 const VIP_LEVELS = [10, 11, 12, 13, 14, 15]
 const STAMINA_OPTIONS: Array<{ value: StaminaBodies; label: string; hint: string }> = [
-  { value: 0, label: '不买体力', hint: '每日基础 438 体力' },
+  { value: 0, label: '不买体力', hint: `每日基础 ${BASE_DAILY_STAMINA} 体力` },
   { value: 3, label: '三体', hint: '额外 150 体力' },
   { value: 6, label: '六体', hint: '额外 300 体力' },
   { value: 9, label: '九体', hint: '额外 450 体力' },
@@ -36,6 +38,11 @@ const STAMINA_OPTIONS: Array<{ value: StaminaBodies; label: string; hint: string
 const formatInteger = (value: number) =>
   new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 0 }).format(Number.isFinite(value) ? value : 0)
 
+const formatDays = (value: number) =>
+  new Intl.NumberFormat('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+    Number.isFinite(value) ? value : 0,
+  )
+
 const createDefaultConfig = (): UpgradeConfig => ({
   currentLevel: 140,
   currentExp: 0,
@@ -43,6 +50,7 @@ const createDefaultConfig = (): UpgradeConfig => ({
   vipLevel: 10,
   superKage: false,
   staminaBodies: 3,
+  otherWeeklyStamina: 500,
   weeklyPack: true,
   packOffset: 0,
   startDate: localDateInputValue(),
@@ -68,7 +76,8 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
   )
   const currentThreshold = getUpgradeLevelData(form.currentLevel)?.expNeeded ?? 0
   const purchasedStamina = form.staminaBodies * 50
-  const baseStamina = 438 + (form.superKage ? 150 : 0) + purchasedStamina
+  const otherDailyStamina = form.otherWeeklyStamina / 7
+  const baseStamina = BASE_DAILY_STAMINA + (form.superKage ? 150 : 0) + purchasedStamina + otherDailyStamina
 
   const update = <K extends keyof UpgradeConfig>(key: K, value: UpgradeConfig[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -190,6 +199,16 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
               onChange={(staminaBodies) => update('staminaBodies', staminaBodies)}
             />
 
+            <NumberField
+              label="其他每周体力"
+              value={form.otherWeeklyStamina}
+              suffix="体力/周"
+              onChange={(otherWeeklyStamina) => update('otherWeeklyStamina', otherWeeklyStamina)}
+            />
+            <p className="upgrade-field-help">
+              V 特权、心悦和活动等其他来源；按每周总量 ÷ 7 平均计入每日体力。
+            </p>
+
             <label className="upgrade-toggle">
               <span><b>每周体力礼包</b><small>每 7 天领取 150 体力</small></span>
               <input
@@ -216,8 +235,10 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
               <span>每日固定体力</span>
               <strong>{formatInteger(baseStamina)}</strong>
               <small>
-                自然 288 + 拉面 {form.superKage ? '300' : '150'}
+                自然 {DAILY_STAMINA_SOURCES.natural} + 拉面 {form.superKage ? '300' : DAILY_STAMINA_SOURCES.ramen}
+                {' '}+ 好友 {DAILY_STAMINA_SOURCES.friendGift}
                 {purchasedStamina ? ` + 买体 ${purchasedStamina}` : ''}
+                {form.otherWeeklyStamina ? ` + 其他日均 ${formatInteger(otherDailyStamina)}` : ''}
               </small>
             </div>
 
@@ -244,8 +265,8 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
           <div className="upgrade-summary-grid">
             <article className="upgrade-summary primary">
               <span>预计需要</span>
-              <strong>{formatInteger(result.days)}<small>天</small></strong>
-              <p>按完整收益日计算</p>
+              <strong>{formatDays(result.preciseDays)}<small>天</small></strong>
+              <p>按平均每日收益精确计算</p>
             </article>
             <article className="upgrade-summary mint">
               <span>预计完成</span>
