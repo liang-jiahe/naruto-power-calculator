@@ -21,7 +21,7 @@ const baseConfig: UpgradeConfig = {
 describe('升级经验数据', () => {
   it('完整迁移 140—170 级经验与收益表', () => {
     expect(UPGRADE_LEVEL_DATA).toHaveLength(31)
-    expect(UPGRADE_LEVEL_DATA[0]).toMatchObject({ level: 140, expNeeded: 10_035_498, activeTotal: 75_074 })
+    expect(UPGRADE_LEVEL_DATA[0]).toMatchObject({ level: 140, expNeeded: 10_035_498, activeTotal: 75_087.8896 })
     expect(UPGRADE_LEVEL_DATA.at(-1)).toMatchObject({ level: 170, expNeeded: null })
   })
 
@@ -33,21 +33,39 @@ describe('升级经验数据', () => {
 
   it('141 级收益与参考计算器一致', () => {
     expect(getUpgradeLevelData(141)).toMatchObject({
-      bounty: 95_139,
-      activeTotal: 76_517,
+      bountyV10: 114_166.525,
+      bountyV14: 121_777.6802,
+      activeTotal: 76_517.2276,
       normalExp: 803,
-      shuraExp: 4_282,
+      shuraExp: 4_281.596,
     })
+  })
+
+  it('140—169 级 V10/V14 丰饶数据完整匹配参考表', () => {
+    expect(UPGRADE_LEVEL_DATA.slice(0, -1).map((row) => Math.round(row.bountyV10))).toEqual([
+      112_034, 114_167, 116_299, 118_432, 120_849, 124_403, 127_958, 131_512, 135_066, 138_621,
+      142_175, 145_729, 149_284, 152_838, 156_393, 159_947, 167_411, 167_553, 167_695, 167_838,
+      167_980, 168_051, 168_122, 168_193, 168_264, 168_335, 168_406, 168_477, 168_548, 168_620,
+    ])
+    expect(UPGRADE_LEVEL_DATA.slice(0, -1).map((row) => Math.round(row.bountyV14))).toEqual([
+      119_503, 121_778, 124_052, 126_327, 128_905, 132_697, 136_488, 140_279, 144_071, 147_862,
+      151_653, 155_445, 159_236, 163_027, 166_819, 170_610, 178_572, 178_724, 178_875, 179_027,
+      179_178, 179_254, 179_330, 179_406, 179_482, 179_558, 179_633, 179_709, 179_785, 179_861,
+    ])
   })
 })
 
 describe('逐日升级推演', () => {
-  it('叠加 V 等级和超影丰饶加成并四舍五入', () => {
-    expect(simulateUpgrade(baseConfig).firstDay?.bountyExp).toBe(Math.round(73_410 * 1.2))
-    expect(simulateUpgrade({ ...baseConfig, vipLevel: 14 }).firstDay?.bountyExp).toBe(Math.round(73_410 * 1.3))
-    expect(simulateUpgrade({ ...baseConfig, superKage: true }).firstDay?.bountyExp).toBe(Math.round(73_410 * 1.5))
+  it('使用逐级 V10/V14 丰饶表并叠加超影基础加成', () => {
+    const level140 = getUpgradeLevelData(140)!
+    const superBonus = (level140.bountyV10 / 1.2) * 0.3
+    expect(simulateUpgrade(baseConfig).firstDay?.bountyExp).toBe(Math.round(level140.bountyV10))
+    expect(simulateUpgrade({ ...baseConfig, vipLevel: 14 }).firstDay?.bountyExp).toBe(Math.round(level140.bountyV14))
+    expect(simulateUpgrade({ ...baseConfig, superKage: true }).firstDay?.bountyExp).toBe(
+      Math.round(level140.bountyV10 + superBonus),
+    )
     expect(simulateUpgrade({ ...baseConfig, vipLevel: 14, superKage: true }).firstDay?.bountyExp).toBe(
-      Math.round(73_410 * 1.6),
+      Math.round(level140.bountyV14 + superBonus),
     )
   })
 
