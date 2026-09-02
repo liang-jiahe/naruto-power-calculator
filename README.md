@@ -2,7 +2,7 @@
 
 一个纯前端、非官方的同人工具，包含“战力计算器”“升级时间计算”“抗魔计算器”和“消耗材料查询”四个板块，均可从侧边栏进入。战力板块支持等级、忍魂、天赋、装备、勾玉、饰品与符文、神器、通灵、忍具、秘卷、装扮、称号和头像框等 16 个战力分项；升级板块可推演 140–170 级的升级天数、完成日期与经验来源；抗魔与材料板块用于规划饰品强化和掉落门槛。
 
-在线使用：[GitHub Pages](https://liang-jiahe.github.io/naruto-power-calculator/)
+在线使用：[GitHub Pages](https://liang-jiahe.github.io/powerscaling-tools/)
 
 ## 功能
 
@@ -26,14 +26,14 @@
 
 ## 页面地址
 
-GitHub Pages 项目根路径 `/naruto-power-calculator/` 显示首页；工具使用哈希地址，无需服务器路由配置，刷新不会产生子路径 404：
+GitHub Pages 项目根路径 `/powerscaling-tools/` 显示首页；工具使用哈希地址，无需服务器路由配置，刷新不会产生子路径 404：
 
-- 首页：`/naruto-power-calculator/`
-- 战力计算器：`/naruto-power-calculator/#/power`
-- 战力分项（示例）：`/naruto-power-calculator/#/power/tools`
-- 升级时间计算：`/naruto-power-calculator/#/upgrade`
-- 抗魔计算器：`/naruto-power-calculator/#/magic`
-- 消耗材料查询：`/naruto-power-calculator/#/materials`
+- 首页：`/powerscaling-tools/`
+- 战力计算器：`/powerscaling-tools/#/power`
+- 战力分项（示例）：`/powerscaling-tools/#/power/tools`
+- 升级时间计算：`/powerscaling-tools/#/upgrade`
+- 抗魔计算器：`/powerscaling-tools/#/magic`
+- 消耗材料查询：`/powerscaling-tools/#/materials`
 
 首页分项会自动展开并高亮对应侧边栏条目。可通过侧边栏“首页”或手机底部首页按钮返回根地址，输入数据在切换时保留。刷新会恢复当前页面位置；升级、抗魔与材料的输入仍遵循本次会话规则，刷新后恢复默认，不会新增持久化。
 
