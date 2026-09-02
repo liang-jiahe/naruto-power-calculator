@@ -3,6 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 
 const openPowerOverview = () => {
+  const homeLink = screen.queryByRole('link', { name: '进入战力计算器' })
+  if (homeLink) {
+    fireEvent.click(homeLink)
+    return
+  }
   const trigger = screen.getByRole('button', { name: '战力计算器' })
   if (trigger.getAttribute('aria-expanded') === 'false') fireEvent.click(trigger)
   fireEvent.click(screen.getByRole('link', { name: '战力总览' }))
@@ -17,6 +22,7 @@ describe('多板块导航与状态', () => {
 
   it('战力计算器导航默认折叠并可展开，再次点击收起', () => {
     render(<App />)
+    fireEvent.click(screen.getByRole('link', { name: '进入升级时间计算' }))
     const trigger = screen.getByRole('button', { name: '战力计算器' })
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryByRole('link', { name: '战力总览' })).not.toBeInTheDocument()
@@ -32,7 +38,7 @@ describe('多板块导航与状态', () => {
 
   it('切换板块时保留升级输入，重新挂载后恢复默认', () => {
     const view = render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: '升级时间计算' }))
+    fireEvent.click(screen.getByRole('link', { name: '进入升级时间计算' }))
     const currentExp = screen.getByRole('spinbutton', { name: /本级已有经验/ })
     fireEvent.change(currentExp, { target: { value: '123' } })
 
@@ -48,7 +54,7 @@ describe('多板块导航与状态', () => {
 
   it.each(['升级时间计算', '抗魔计算器', '消耗材料查询'])('%s 不显示顶部导出、导入、公式与清空按钮', (workspace) => {
     const { container } = render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: workspace }))
+    fireEvent.click(screen.getByRole('link', { name: `进入${workspace}` }))
     for (const name of ['下载 PDF', '导入', '公式', 'PDF', '清空']) {
       expect(screen.queryByRole('button', { name })).not.toBeInTheDocument()
     }
@@ -60,7 +66,7 @@ describe('多板块导航与状态', () => {
 
   it('完整展示升级结果和经验表入口', () => {
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: '升级时间计算' }))
+    fireEvent.click(screen.getByRole('link', { name: '进入升级时间计算' }))
 
     expect(screen.getByRole('heading', { name: '升级时间计算' })).toBeVisible()
     expect(screen.getByText('冲级路线')).toBeVisible()
@@ -81,6 +87,7 @@ describe('多板块导航与状态', () => {
 
   it('侧边栏可进入抗魔与材料板块，切换后保留输入和更换标记', () => {
     render(<App />)
+    openPowerOverview()
     fireEvent.click(screen.getByRole('button', { name: '抗魔计算器' }))
     expect(screen.getByRole('heading', { name: '抗魔计算器' })).toBeVisible()
     expect(screen.getByRole('button', { name: '抗魔计算器' })).toHaveAttribute('aria-current', 'page')
@@ -131,6 +138,7 @@ describe('多板块导航与状态', () => {
 
   it('移动导航打开新板块后关闭侧栏，底部导航可在抗魔和材料间切换', () => {
     render(<App />)
+    openPowerOverview()
     fireEvent.click(screen.getByRole('button', { name: '打开导航' }))
     expect(document.querySelector('.sidebar')).toHaveClass('open')
     fireEvent.click(screen.getByRole('button', { name: '抗魔计算器' }))
