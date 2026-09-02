@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PackageSearch, PawPrint } from 'lucide-react'
+import { PackageSearch } from 'lucide-react'
 import { ThemedSelect } from '../ThemedSelect'
 import { formatNumber } from '../components'
 import { calculateMaterials, createMaterialQuery, normalizeMaterialQuery } from './calculator'
@@ -22,7 +22,6 @@ export function MaterialsCalculator() {
     <div className="magic-workspace" id="materials-top">
       <header className="magic-heading">
         <div>
-          <span className="magic-kicker"><PawPrint size={15} />材料查询</span>
           <h1>强化材料查询</h1>
           <p>选择饰品系列和强化区间，查清每级与累计需要的绿水、紫星和保护符。</p>
         </div>

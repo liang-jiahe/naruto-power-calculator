@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Clock3,
   Gift,
-  PawPrint,
   Sparkles,
 } from 'lucide-react'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
@@ -107,7 +106,6 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
     <div className="upgrade-workspace" id="upgrade-top">
       <section className="upgrade-hero">
         <div className="upgrade-hero-copy">
-          <span className="upgrade-kicker"><PawPrint size={15} />升级计算</span>
           <h1>升级时间计算</h1>
           <p>把每日体力、精英与修罗副本、活跃和丰饶收益逐日推演，算出预计升级日期。</p>
           <div className="upgrade-hero-pills">
@@ -331,7 +329,7 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
 
       <details className="upgrade-reference" id="upgrade-reference">
         <summary>
-          <span><small>数据参考</small>查看 140—170 级原始经验表</span>
+          <span>查看 140—170 级原始经验表</span>
           <b aria-hidden="true">＋</b>
         </summary>
         <div className="upgrade-table-scroll">

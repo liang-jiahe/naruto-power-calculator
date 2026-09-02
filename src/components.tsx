@@ -147,7 +147,6 @@ export function AttributeEditor({
 
 export function SectionCard({
   id,
-  eyebrow,
   title,
   description,
   value,
@@ -156,7 +155,6 @@ export function SectionCard({
   children,
 }: {
   id: string
-  eyebrow: string
   title: string
   description: string
   value: number
@@ -168,7 +166,6 @@ export function SectionCard({
     <section id={id} className={`section-card tone-${tone}`}>
       <header className="section-head">
         <div>
-          <span className="eyebrow">{eyebrow}</span>
           <h2>{title}</h2>
           <p>{description}</p>
         </div>
