@@ -313,7 +313,7 @@ function App() {
         <aside className={menuOpen ? 'sidebar open' : 'sidebar'}>
           <div className="brand">
             <div className="brand-mark"><Cat size={25} /></div>
-            <div><strong>火影战力计算器</strong><span>猫咪工具箱</span></div>
+            <div><strong>火影战力计算器</strong></div>
             <button onClick={() => setMenuOpen(false)} className="sidebar-close" aria-label="关闭导航"><X size={20} /></button>
           </div>
           <nav aria-label="页面导航">

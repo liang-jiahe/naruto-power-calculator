@@ -96,7 +96,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   font-weight: 800;
   letter-spacing: -.02em;
 }
-.brand span { color: var(--muted); font-size: 9.5px; letter-spacing: .04em; }
 .sidebar-close { display: none; border: 0; background: transparent; margin-left: auto; cursor: pointer; }
 .sidebar nav {
   padding: 8px 0 16px;
