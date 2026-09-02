@@ -159,7 +159,7 @@ function SummonPowerCard({
 function App() {
   const [state, setState] = useState<CalculatorState>(loadState)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [route, setRoute] = useState(() => parseRoute(window.location.hash))
+  const [route, setRoute] = useState(() => parseRoute(window.location.hash, window.location.pathname))
   const activeWorkspace = route.workspace
   const [powerNavOpen, setPowerNavOpen] = useState(false)
   const [exportingPdf, setExportingPdf] = useState(false)
@@ -170,7 +170,7 @@ function App() {
 
   useEffect(() => {
     const syncLocation = () => {
-      setRoute(parseRoute(window.location.hash))
+      setRoute(parseRoute(window.location.hash, window.location.pathname))
       setMenuOpen(false)
     }
     window.addEventListener('hashchange', syncLocation)

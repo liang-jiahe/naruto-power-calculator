@@ -27,16 +27,16 @@
 
 ## 页面地址
 
-GitHub Pages 项目根路径 `/powerscaling-tools/` 显示首页；工具使用哈希地址，无需服务器路由配置，刷新不会产生子路径 404：
+GitHub Pages 项目根路径 `/powerscaling-tools/` 显示首页；每个工具都有独立的 HTML 文件地址，刷新不会产生子路径 404：
 
 - 首页：`/powerscaling-tools/`
-- 战力计算器：`/powerscaling-tools/#/power`
-- 战力分项（示例）：`/powerscaling-tools/#/power/tools`
-- 升级时间计算：`/powerscaling-tools/#/upgrade`
-- 抗魔计算器：`/powerscaling-tools/#/magic`
-- 消耗材料查询：`/powerscaling-tools/#/materials`
+- 战力计算器：`/powerscaling-tools/power.html`
+- 战力分项（示例）：`/powerscaling-tools/power.html#tools`
+- 升级时间计算：`/powerscaling-tools/upgrade.html`
+- 抗魔计算器：`/powerscaling-tools/shipin/km_cal.html`
+- 消耗材料查询：`/powerscaling-tools/shipin/materials.html`
 
-首页卡片可进入对应工具，战力分项在工具页侧边栏中选择；分项直链会自动展开并高亮对应条目。工具页保留侧边栏与手机导航，可通过“首页”或手机底部首页按钮返回根地址，输入数据在切换时保留。首页卡片在桌面（≥1024px）为三列、平板（640–1023px）为两列、手机（<640px）为一列。刷新会恢复当前页面位置；升级、抗魔与材料的输入仍遵循本次会话规则，刷新后恢复默认，不会新增持久化。
+旧的 `#/power`、`#/upgrade`、`#/magic`、`#/materials` 哈希链接仍可打开对应工具。首页卡片可进入对应工具，战力分项会自动展开并高亮侧边栏条目。工具页保留侧边栏与手机导航，可通过“首页”或手机底部首页按钮返回根地址，输入数据在切换时保留。首页卡片在桌面（≥1024px）为三列、平板（640–1023px）为两列、手机（<640px）为一列。刷新会恢复当前页面和分项位置；升级、抗魔与材料的输入仍遵循本次会话规则，刷新后恢复默认，不会新增持久化。
 
 ## 本地开发
 
