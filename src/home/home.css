@@ -1,8 +1,8 @@
 .home-workspace { width: min(1200px, calc(100% - 48px)); margin: 0 auto; padding: 32px 0; }
 .home-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
 .home-category-icon { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 11px; color: var(--primary); background: var(--mint-soft); }
-.home-heading h1 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; margin: 0; color: var(--primary-deep); font-size: 20px; line-height: 1.5; font-weight: 800; }
-.home-heading h1 span { color: var(--muted); font-size: 12px; font-weight: 500; }
+.home-heading h1 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; margin: 0; color: var(--primary-deep); font-size: 21px; line-height: 1.5; font-weight: 800; }
+.home-heading h1 span { color: var(--muted); font-size: 13px; font-weight: 500; }
 .home-tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .home-tool-card { position: relative; display: flex; align-items: center; gap: 16px; min-width: 0; min-height: 104px; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--charcoal); text-decoration: none; box-shadow: var(--shadow-soft); transition: border-color .18s ease, box-shadow .18s ease; }
 .home-tool-card::before { content: ""; position: absolute; inset: 12px auto 12px -1px; width: 4px; border-radius: 4px; background: var(--mint); }
@@ -10,8 +10,8 @@
 .home-tool-card:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 .home-tool-icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 12px; color: var(--primary); background: var(--mint-soft); }
 .home-tool-copy { min-width: 0; }
-.home-tool-copy h2 { margin: 0 0 4px; color: var(--primary-deep); font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
-.home-tool-copy p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; max-height: 3.4em; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.home-tool-copy h2 { margin: 0 0 4px; color: var(--primary-deep); font-size: 17px; line-height: 1.5; overflow-wrap: anywhere; }
+.home-tool-copy p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; max-height: 3.4em; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
 #home-top:focus { outline: none; }
 @media (max-width: 1023px) {
   .home-tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
