@@ -11,6 +11,7 @@ const openPowerOverview = () => {
 describe('多板块导航与状态', () => {
   beforeEach(() => {
     localStorage.clear()
+    window.history.replaceState(null, '', import.meta.env.BASE_URL)
     vi.spyOn(window, 'confirm').mockReturnValue(true)
   })
 
@@ -69,6 +70,7 @@ describe('多板块导航与状态', () => {
 
   it('仅启用 PDF 文本导出，其他工具按钮保持禁用', () => {
     render(<App />)
+    openPowerOverview()
 
     const exportButton = screen.getByRole('button', { name: '下载 PDF' })
     expect(exportButton).toBeEnabled()
@@ -98,6 +100,7 @@ describe('多板块导航与状态', () => {
 
   it('抗魔内置重置与战力清空相互独立，不影响升级和材料配置', () => {
     render(<App />)
+    openPowerOverview()
     fireEvent.change(screen.getByRole('spinbutton', { name: '当前等级' }), { target: { value: '60' } })
     fireEvent.click(screen.getByRole('button', { name: '升级时间计算' }))
     fireEvent.change(screen.getByRole('spinbutton', { name: /本级已有经验/ }), { target: { value: '123' } })

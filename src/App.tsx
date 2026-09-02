@@ -36,6 +36,15 @@ import { ThemedSelect } from './ThemedSelect'
 import { UpgradeCalculator } from './upgrade/UpgradeCalculator'
 import { MagicCalculator } from './magic/MagicCalculator'
 import { MaterialsCalculator } from './magic/MaterialsCalculator'
+import { HomePage, type NavigateLink } from './home/HomePage'
+import {
+  POWER_NAV_ITEMS as navItems,
+  WORKSPACE_LABELS as workspaceLabels,
+  createRoute,
+  parseRoute,
+  routeHref,
+  type Workspace,
+} from './navigation'
 import { SUMMON_DATA } from './domain/data'
 import { calculateAll } from './domain/engine'
 import { buildFormulaText, resolveModuleFormulas } from './domain/formulas'
@@ -49,35 +58,6 @@ import type {
   PowerBreakdown,
   SimpleModuleKey,
 } from './domain/types'
-
-const navItems = [
-  ['overview', '战力总览'],
-  ['collection', '忍者收集'],
-  ['level', '等级战力'],
-  ['soul', '忍魂'],
-  ['talent', '天赋'],
-  ['equipment', '装备'],
-  ['magatama', '勾玉'],
-  ['accessories', '饰品符文'],
-  ['artifact', '神器'],
-  ['summoning', '通灵'],
-  ['tools', '忍具'],
-  ['scroll', '秘卷'],
-  ['outfit', '装扮'],
-  ['title', '称号'],
-  ['avatar', '头像框'],
-] as const
-
-const workspaceLabels = {
-  power: '战力计算器',
-  upgrade: '升级时间计算',
-  magic: '抗魔计算器',
-  materials: '消耗材料查询',
-} as const
-type Workspace = keyof typeof workspaceLabels
-const workspaceTargets: Record<Workspace, string> = {
-  power: 'overview', upgrade: 'upgrade-top', magic: 'magic-top', materials: 'materials-top',
-}
 
 const sectionLabels: Record<string, string> = {
   level: '等级',
@@ -179,13 +159,47 @@ function SummonPowerCard({
 function App() {
   const [state, setState] = useState<CalculatorState>(loadState)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('power')
+  const [route, setRoute] = useState(() => parseRoute(window.location.hash))
+  const activeWorkspace = route.workspace
   const [powerNavOpen, setPowerNavOpen] = useState(false)
   const [exportingPdf, setExportingPdf] = useState(false)
   const [toast, setToast] = useState('已载入本机数据')
   const fileInput = useRef<HTMLInputElement>(null)
   const result = useMemo(() => calculateAll(state), [state])
   const formulas = useMemo(() => resolveModuleFormulas(state.bonuses), [state.bonuses])
+
+  useEffect(() => {
+    const syncLocation = () => {
+      setRoute(parseRoute(window.location.hash))
+      setMenuOpen(false)
+    }
+    window.addEventListener('hashchange', syncLocation)
+    window.addEventListener('popstate', syncLocation)
+    return () => {
+      window.removeEventListener('hashchange', syncLocation)
+      window.removeEventListener('popstate', syncLocation)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (route.workspace === 'power') setPowerNavOpen(true)
+    if (route.workspace === 'home') setPowerNavOpen(false)
+    document.title = `${workspaceLabels[route.workspace]} · 火影战力计算器 · 繁星の猫猫星`
+    let scrollFrame = 0
+    const renderFrame = window.requestAnimationFrame(() => {
+      scrollFrame = window.requestAnimationFrame(() => {
+        const target = document.getElementById(route.section)
+        if (!target) return
+        target.scrollIntoView({ block: 'start' })
+        if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+        target.focus({ preventScroll: true })
+      })
+    })
+    return () => {
+      window.cancelAnimationFrame(renderFrame)
+      window.cancelAnimationFrame(scrollFrame)
+    }
+  }, [route])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -265,16 +279,21 @@ function App() {
     setToast('战力计算器已恢复默认值')
   }
 
-  const scrollToSection = (id: string) => {
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }))
-    })
+  const switchWorkspace = (workspace: Workspace, target?: string) => {
+    const href = routeHref(workspace, target)
+    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== href) {
+      window.history.pushState(null, '', href)
+    }
+    setRoute(createRoute(workspace, target))
+    setMenuOpen(false)
   }
 
-  const switchWorkspace = (workspace: Workspace, target?: string) => {
-    setActiveWorkspace(workspace)
-    setMenuOpen(false)
-    scrollToSection(target ?? workspaceTargets[workspace])
+  const scrollToSection = (id: string) => switchWorkspace(activeWorkspace, id)
+
+  const navigateLink: NavigateLink = (event, workspace, section) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    switchWorkspace(workspace, section)
   }
 
   const chartData = Object.entries(result.sections)
@@ -296,6 +315,13 @@ function App() {
         </div>
         <nav aria-label="页面导航">
           <button
+            className={activeWorkspace === 'home' ? 'workspace-nav-button home-nav-button active' : 'workspace-nav-button home-nav-button'}
+            type="button" aria-current={activeWorkspace === 'home' ? 'page' : undefined}
+            onClick={() => switchWorkspace('home')}
+          >
+            <House size={15} /><span>首页</span>
+          </button>
+          <button
             className={activeWorkspace === 'power' ? 'nav-group-trigger active' : 'nav-group-trigger'}
             type="button"
             aria-expanded={powerNavOpen}
@@ -309,15 +335,9 @@ function App() {
             {navItems.map(([id, label]) => (
               <a
                 key={id}
-                href={`#${id}`}
-                onClick={(event) => {
-                  if (activeWorkspace !== 'power') {
-                    event.preventDefault()
-                    switchWorkspace('power', id)
-                  } else {
-                    setMenuOpen(false)
-                  }
-                }}
+                href={routeHref('power', id)}
+                aria-current={activeWorkspace === 'power' && route.section === id ? 'location' : undefined}
+                onClick={(event) => navigateLink(event, 'power', id)}
               >
                 <ChevronRight size={13} /><span>{label}</span>
               </a>
@@ -363,8 +383,8 @@ function App() {
       <main>
         <header className="topbar">
           <div className="save-state">
-            <Save size={15} />
-            {activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : `${workspaceLabels[activeWorkspace]}配置仅在本次会话保留`}
+            {activeWorkspace === 'home' ? <House size={15} /> : <Save size={15} />}
+            {activeWorkspace === 'home' ? '工具首页 · 选择工具开始计算' : activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : `${workspaceLabels[activeWorkspace]}配置仅在本次会话保留`}
           </div>
           <div className="toolbar">
             {activeWorkspace === 'power' && (
@@ -388,6 +408,9 @@ function App() {
           </div>
         </header>
 
+        <div className="workspace-view" hidden={activeWorkspace !== 'home'}>
+          <HomePage onNavigate={navigateLink} />
+        </div>
         <div className="content workspace-view" hidden={activeWorkspace !== 'power'}>
           <section className="hero" id="overview">
             <img
@@ -592,7 +615,7 @@ function App() {
           <>
             <button type="button" onClick={() => switchWorkspace('upgrade')}><Clock3 size={20} /><span>升级</span></button>
             <button type="button" onClick={() => scrollToSection('collection')}><BarChart3 size={20} /><span>收集</span></button>
-            <button className="mobile-fab" type="button" aria-label="战力总览" onClick={() => scrollToSection('overview')}><Cat size={27} /></button>
+            <button className="mobile-fab" type="button" aria-label="返回首页" onClick={() => switchWorkspace('home')}><House size={25} /></button>
             <button type="button" onClick={() => scrollToSection('tools')}><Sparkles size={20} /><span>忍具</span></button>
             <button type="button" onClick={() => scrollToSection('accessories')}><ShieldCheck size={20} /><span>符文</span></button>
           </>
@@ -600,7 +623,7 @@ function App() {
           <>
             <button type="button" onClick={() => switchWorkspace('power')}><House size={20} /><span>战力</span></button>
             <button type="button" onClick={() => scrollToSection('upgrade-results')}><BarChart3 size={20} /><span>结果</span></button>
-            <button className="mobile-fab" type="button" aria-label="升级时间计算顶部" onClick={() => scrollToSection('upgrade-top')}><Cat size={27} /></button>
+            <button className="mobile-fab" type="button" aria-label="返回首页" onClick={() => switchWorkspace('home')}><House size={25} /></button>
             <button type="button" onClick={() => scrollToSection('upgrade-reference')}><BookOpenText size={20} /><span>经验表</span></button>
             <button type="button" onClick={() => scrollToSection('upgrade-top')}><Clock3 size={20} /><span>升级</span></button>
           </>
@@ -608,7 +631,7 @@ function App() {
           <>
             <button type="button" onClick={() => switchWorkspace('power')}><House size={20} /><span>战力</span></button>
             <button type="button" onClick={() => switchWorkspace('upgrade')}><Clock3 size={20} /><span>升级</span></button>
-            <button className="mobile-fab" type="button" aria-label={`${workspaceLabels[activeWorkspace]}顶部`} onClick={() => scrollToSection(workspaceTargets[activeWorkspace])}><Cat size={27} /></button>
+            <button className="mobile-fab" type="button" aria-label="返回首页" aria-current={activeWorkspace === 'home' ? 'page' : undefined} onClick={() => switchWorkspace('home')}><House size={25} /></button>
             <button type="button" aria-current={activeWorkspace === 'magic' ? 'page' : undefined} onClick={() => switchWorkspace('magic')}><ShieldCheck size={20} /><span>抗魔</span></button>
             <button type="button" aria-current={activeWorkspace === 'materials' ? 'page' : undefined} onClick={() => switchWorkspace('materials')}><PackageSearch size={20} /><span>材料</span></button>
           </>
