@@ -22,7 +22,7 @@ export function MaterialsCalculator() {
     <div className="magic-workspace" id="materials-top">
       <header className="magic-heading">
         <div>
-          <span className="magic-kicker"><PawPrint size={15} />MATERIAL CHECK</span>
+          <span className="magic-kicker"><PawPrint size={15} />材料查询</span>
           <h1>强化材料查询</h1>
           <p>选择饰品系列和强化区间，查清每级与累计需要的绿水、紫星和保护符。</p>
         </div>

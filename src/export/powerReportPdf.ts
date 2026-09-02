@@ -239,7 +239,7 @@ export async function createPowerReportPdf(
 
   document.setTextColor(...primary)
   document.setFontSize(9)
-  document.text('NEKO POWER REPORT', marginX, cursorY)
+  document.text('火影战力报告', marginX, cursorY)
   cursorY += 9
   document.setTextColor(...deep)
   document.setFontSize(23)

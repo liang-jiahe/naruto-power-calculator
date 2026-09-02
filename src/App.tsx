@@ -313,7 +313,7 @@ function App() {
         <aside className={menuOpen ? 'sidebar open' : 'sidebar'}>
           <div className="brand">
             <div className="brand-mark"><Cat size={25} /></div>
-            <div><strong>火影战力计算器</strong><span>NEKO POWER LAB · V1</span></div>
+            <div><strong>火影战力计算器</strong><span>猫咪工具箱 · 第 1 版</span></div>
             <button onClick={() => setMenuOpen(false)} className="sidebar-close" aria-label="关闭导航"><X size={20} /></button>
           </div>
           <nav aria-label="页面导航">
@@ -479,7 +479,7 @@ function App() {
                 alt=""
                 aria-hidden="true"
               />
-              <div><span className="eyebrow">GLOBAL BONUS</span><h2>忍者收集加成</h2><p>修改一次，全页面所有计算立即联动。</p></div>
+              <div><span className="eyebrow">全局加成</span><h2>忍者收集加成</h2><p>修改一次，全页面所有计算立即联动。</p></div>
               <div className="bonus-fields">
                 <ThemedSelect
                   label="全收集档位"
@@ -501,28 +501,28 @@ function App() {
               <FormulaCard formula={formulas.collection} compact />
             </section>
 
-            <SectionCard id="level" eyebrow="LEVEL" title="等级战力" description="按 20–170 级收益表精确查表，并叠加全局收集倍率。" value={result.sections.level.total} formula={formulas.level} tone="blue">
+            <SectionCard id="level" eyebrow="等级" title="等级战力" description="按 20–170 级收益表精确查表，并叠加全局收集倍率。" value={result.sections.level.total} formula={formulas.level} tone="blue">
               <div className="level-field">
                 <NumberField label="当前等级" value={state.level} min={20} max={170} onChange={(level) => setState((s) => ({ ...s, level: Math.trunc(level) }))} />
               </div>
               <BreakdownStrip data={result.sections.level} />
             </SectionCard>
 
-            <SectionCard id="soul" eyebrow="SOUL" title="忍魂" description="忍传感悟吃收集加成；羁绊升级按基础系数直接换算。" value={result.sections.soul.total} formula={formulas.soul}>
+            <SectionCard id="soul" eyebrow="忍魂" title="忍魂" description="忍传感悟吃收集加成；羁绊升级按基础系数直接换算。" value={result.sections.soul.total} formula={formulas.soul}>
               <div className="split-editor"><div><h3>忍传感悟</h3><CoreEditor value={state.soul.insight} onChange={(key, value) => setState((s) => ({ ...s, soul: { ...s.soul, insight: { ...s.soul.insight, [key]: value } } }))} /></div>
                 <div><h3>羁绊升级</h3><CoreEditor value={state.soul.bond} onChange={(key, value) => setState((s) => ({ ...s, soul: { ...s.soul, bond: { ...s.soul.bond, [key]: value } } }))} /></div></div>
               <BreakdownStrip data={result.sections.soul} />
             </SectionCard>
 
-            <SectionCard id="talent" eyebrow="TALENT" title="天赋" description="普通天赋与修罗天赋分别计算，再汇入天赋总战力。" value={result.sections.talent.total} formula={formulas.talent} tone="purple">
+            <SectionCard id="talent" eyebrow="天赋" title="天赋" description="普通天赋与修罗天赋分别计算，再汇入天赋总战力。" value={result.sections.talent.total} formula={formulas.talent} tone="purple">
               <div className="split-editor"><div><h3>普通天赋</h3><CoreEditor value={state.talent.normal} onChange={(key, value) => setState((s) => ({ ...s, talent: { ...s.talent, normal: { ...s.talent.normal, [key]: value } } }))} /></div>
                 <div><h3>修罗天赋</h3><CoreEditor value={state.talent.shura} onChange={(key, value) => setState((s) => ({ ...s, talent: { ...s.talent, shura: { ...s.talent.shura, [key]: value } } }))} /></div></div>
               <BreakdownStrip data={result.sections.talent} />
             </SectionCard>
 
             {([
-              ['equipment', 'EQUIPMENT', '装备', '装备三维属性吃全局收集倍率。', 'blue'],
-              ['magatama', 'MAGATAMA', '勾玉', '勾玉生命、攻击、防御统一计算。', 'green'],
+              ['equipment', '装备', '装备', '装备三维属性吃全局收集倍率。', 'blue'],
+              ['magatama', '勾玉', '勾玉', '勾玉生命、攻击、防御统一计算。', 'green'],
             ] as const).map(([key, eyebrow, title, description, tone]) => (
               <SectionCard key={key} id={key} eyebrow={eyebrow} title={title} description={description} value={result.sections[key].total} formula={formulas[key]} tone={tone}>
                 <CoreEditor value={state.simple[key]} onChange={(field, value) => updateSimple(key, field, value)} />
@@ -530,7 +530,7 @@ function App() {
               </SectionCard>
             ))}
 
-            <SectionCard id="accessories" eyebrow="ACCESSORIES" title="饰品与符文" description="饰品属性、六件符文直接战力和自动匹配的共鸣属性合并计算。" value={result.sections.accessories.total} formula={formulas.accessories} tone="green">
+            <SectionCard id="accessories" eyebrow="饰品符文" title="饰品与符文" description="饰品属性、六件符文直接战力和自动匹配的共鸣属性合并计算。" value={result.sections.accessories.total} formula={formulas.accessories} tone="green">
               <AttributeEditor value={state.accessories.stats} {...attrHandlers('accessories')} elements={false} />
               <div className="rune-grid">
                 {RUNE_SLOTS.map((slot) => {
@@ -543,11 +543,11 @@ function App() {
               <BreakdownStrip data={result.sections.accessories} />
             </SectionCard>
 
-            <SectionCard id="artifact" eyebrow="ARTIFACT" title="神器" description="神器三维属性吃全局收集倍率。" value={result.sections.artifact.total} formula={formulas.artifact} tone="purple">
+            <SectionCard id="artifact" eyebrow="神器" title="神器" description="神器三维属性吃全局收集倍率。" value={result.sections.artifact.total} formula={formulas.artifact} tone="purple">
               <CoreEditor value={state.simple.artifact} onChange={(key, value) => updateSimple('artifact', key, value)} /><BreakdownStrip data={result.sections.artifact} />
             </SectionCard>
 
-            <SectionCard id="summoning" eyebrow="SUMMON" title="通灵" description="修炼属性由通灵兽、等级与强化次数查表；进阶属性由总面板扣除修炼值。" value={result.sections.summoning.total} formula={formulas.summoning}>
+            <SectionCard id="summoning" eyebrow="通灵" title="通灵" description="修炼属性由通灵兽、等级与强化次数查表；进阶属性由总面板扣除修炼值。" value={result.sections.summoning.total} formula={formulas.summoning}>
               <div className="summon-selects">
                 <ThemedSelect
                   label="通灵兽"
@@ -577,7 +577,7 @@ function App() {
             </SectionCard>
 
             <section id="tools" className="section-card tone-blue">
-              <header className="section-head"><div><span className="eyebrow">NINJA TOOL</span><h2>忍具系统</h2><p>穿戴、重铸、藏馆与珍品阁分项计算，避免模式混用。</p></div>
+              <header className="section-head"><div><span className="eyebrow">忍具系统</span><h2>忍具系统</h2><p>穿戴、重铸、藏馆与珍品阁分项计算，避免模式混用。</p></div>
                 <div className="section-total"><span>忍具总战力</span><strong>{formatNumber(result.sections.toolPanel.total + result.sections.toolReforge.total + result.sections.toolMuseum.total + result.sections.toolTreasure.total)}</strong></div></header>
               <div className="tool-block"><h3>忍具穿戴 · {formatNumber(result.sections.toolPanel.total)}</h3><FormulaCard formula={formulas.toolPanel} compact /><AttributeEditor value={state.tools.panel} {...attrHandlers('panel')} /><BreakdownStrip data={result.sections.toolPanel} /></div>
               <div className="tool-block"><h3>挂件坠饰重铸 · {formatNumber(result.sections.toolReforge.total)}</h3><FormulaCard formula={formulas.toolReforge} compact /><AttributeEditor value={state.tools.reforge} {...attrHandlers('reforge')} elements={false} /><BreakdownStrip data={result.sections.toolReforge} /></div>
@@ -592,10 +592,10 @@ function App() {
             </section>
 
             {([
-              ['scroll', 'SCROLL', '秘卷', '秘卷三维属性吃全局收集倍率。', 'green'],
-              ['outfit', 'OUTFIT', '装扮', '装扮属性按基础系数计算，不吃收集加成。', 'purple'],
-              ['title', 'TITLE', '称号', '称号三维属性吃全局收集倍率。', 'orange'],
-              ['avatar', 'AVATAR', '头像框', '头像框三维属性吃全局收集倍率。', 'blue'],
+              ['scroll', '秘卷', '秘卷', '秘卷三维属性吃全局收集倍率。', 'green'],
+              ['outfit', '装扮', '装扮', '装扮属性按基础系数计算，不吃收集加成。', 'purple'],
+              ['title', '称号', '称号', '称号三维属性吃全局收集倍率。', 'orange'],
+              ['avatar', '头像框', '头像框', '头像框三维属性吃全局收集倍率。', 'blue'],
             ] as const).map(([key, eyebrow, title, description, tone]) => (
               <SectionCard key={key} id={key} eyebrow={eyebrow} title={title} description={description} value={result.sections[key].total} formula={formulas[key]} tone={tone}>
                 <CoreEditor value={state.simple[key]} onChange={(field, value) => updateSimple(key, field, value)} />

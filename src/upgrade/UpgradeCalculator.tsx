@@ -107,7 +107,7 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
     <div className="upgrade-workspace" id="upgrade-top">
       <section className="upgrade-hero">
         <div className="upgrade-hero-copy">
-          <span className="upgrade-kicker"><PawPrint size={15} />LEVEL UP LAB</span>
+          <span className="upgrade-kicker"><PawPrint size={15} />升级计算</span>
           <h1>升级时间计算</h1>
           <p>把每日体力、精英与修罗副本、活跃和丰饶收益逐日推演，算出预计升级日期。</p>
           <div className="upgrade-hero-pills">
@@ -151,7 +151,7 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
               label="本级已有经验"
               value={form.currentExp}
               max={Math.max(0, currentThreshold - 1)}
-              suffix="EXP"
+              suffix="经验"
               onChange={(currentExp) => update('currentExp', currentExp)}
             />
             <p className="upgrade-field-help">
@@ -331,7 +331,7 @@ export function UpgradeCalculator({ resetSignal }: { resetSignal: number }) {
 
       <details className="upgrade-reference" id="upgrade-reference">
         <summary>
-          <span><small>DATA REFERENCE</small>查看 140—170 级原始经验表</span>
+          <span><small>数据参考</small>查看 140—170 级原始经验表</span>
           <b aria-hidden="true">＋</b>
         </summary>
         <div className="upgrade-table-scroll">

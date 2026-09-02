@@ -35,7 +35,7 @@ export function MagicCalculator() {
     <div className="magic-workspace" id="magic-top">
       <header className="magic-heading">
         <div>
-          <span className="magic-kicker"><PawPrint size={15} />MAGIC CHECK</span>
+          <span className="magic-kicker"><PawPrint size={15} />抗魔计算</span>
           <h1>抗魔计算器</h1>
           <p>输入六件饰品的基础抗魔和强化等级，看看离目标饰品还有多远。</p>
         </div>

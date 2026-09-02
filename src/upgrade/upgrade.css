@@ -42,7 +42,7 @@
   color: var(--primary);
   font-size: 12px;
   font-weight: 800;
-  letter-spacing: .14em;
+  letter-spacing: .04em;
 }
 .upgrade-hero h1 {
   margin: 10px 0 8px;
@@ -134,7 +134,7 @@
   color: var(--primary);
   font-size: 12px;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: .03em;
 }
 .upgrade-section-title h2 { margin: 2px 0 0; color: var(--primary-deep); font-size: 23px; }
 .upgrade-form-card form { margin-top: 21px; }
@@ -362,7 +362,7 @@
 }
 .upgrade-reference summary::-webkit-details-marker { display: none; }
 .upgrade-reference summary span { display: grid; gap: 3px; }
-.upgrade-reference summary small { color: var(--primary); font-size: 11px; letter-spacing: .13em; }
+.upgrade-reference summary small { color: var(--primary); font-size: 11px; letter-spacing: .03em; }
 .upgrade-reference summary b { color: var(--primary); font-size: 21px; transition: .18s ease; }
 .upgrade-reference[open] summary b { transform: rotate(45deg); }
 .upgrade-reference .upgrade-table-scroll { max-height: 520px; border-top: 1px solid var(--line); }
