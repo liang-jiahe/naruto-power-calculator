@@ -34,7 +34,10 @@
 .magic-equipment-table .field > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .magic-equipment-table input { text-align: right; }
 .magic-piece-total { color: var(--primary); font-weight: 800; }
-.magic-tier-select { width: 100%; min-width: 90px; min-height: 42px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--primary-deep); cursor: pointer; }
+.magic-equipment-table .themed-select { min-width: 106px; }
+.magic-equipment-table .themed-select-trigger { min-height: 42px; height: 42px; padding: 0 10px; border-radius: 12px; box-shadow: none; }
+.magic-equipment-table .themed-select-value { gap: 6px; font-size: 14px; }
+.magic-equipment-table .themed-select-popover { top: calc(100% + 6px); left: auto; right: 0; min-width: 210px; }
 .magic-toggle { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-soft); color: var(--muted); cursor: pointer; }
 .magic-toggle.selected { border-color: #acd6be; background: var(--mint); color: var(--primary-deep); }
 .magic-tier-table { min-width: 530px; }

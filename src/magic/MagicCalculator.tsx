@@ -83,10 +83,12 @@ export function MagicCalculator() {
                 /></td>
                 <td className="magic-numeric magic-piece-total">{format(result.pieceTotals[index])}</td>
                 <td>
-                  <select className="magic-tier-select" aria-label={`${MAGIC_SLOTS[index]}饰品名称`}
-                    value={piece.name} onChange={(event) => updatePiece(index, { name: event.target.value as MagicTierName })}>
-                    {MAGIC_TIERS.map((tier) => <option key={tier.name} value={tier.name}>{tier.name}</option>)}
-                  </select>
+                  <ThemedSelect
+                    label={`${MAGIC_SLOTS[index]}饰品名称`}
+                    value={piece.name}
+                    options={tierOptions}
+                    onChange={(name) => updatePiece(index, { name })}
+                  />
                 </td>
                 <td><button
                   type="button" className={piece.replace ? 'magic-toggle selected' : 'magic-toggle'}
