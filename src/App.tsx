@@ -184,7 +184,7 @@ function App() {
   useEffect(() => {
     if (route.workspace === 'power') setPowerNavOpen(true)
     if (route.workspace === 'home') setPowerNavOpen(false)
-    document.title = `${workspaceLabels[route.workspace]} · 火影战力计算器 · 繁星の猫猫星`
+    document.title = workspaceLabels[route.workspace]
     let scrollFrame = 0
     const renderFrame = window.requestAnimationFrame(() => {
       scrollFrame = window.requestAnimationFrame(() => {
@@ -356,8 +356,7 @@ function App() {
               </button>
             )}
             {(activeWorkspace === 'magic' || activeWorkspace === 'materials') && (
-              <div className="sidebar-tool-group" role="group" aria-labelledby="accessory-tools-label">
-                <div className="sidebar-category" id="accessory-tools-label"><ShieldCheck size={15} /><span>抗魔与材料</span></div>
+              <div className="sidebar-tool-group" role="group" aria-label="抗魔与材料工具">
                 <button
                   className={activeWorkspace === 'magic' ? 'workspace-nav-button active' : 'workspace-nav-button'}
                   type="button"

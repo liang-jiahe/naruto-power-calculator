@@ -37,6 +37,13 @@ describe('首页快捷导航', () => {
     expect(window.location.hash).toBe('')
   })
 
+  it('所有设备标题都只显示当前工具名称', () => {
+    render(<App />)
+    expect(document.title).toBe('工具首页')
+    fireEvent.click(screen.getByRole('link', { name: '进入抗魔计算器' }))
+    expect(document.title).toBe('抗魔计算器')
+  })
+
   it.each(['power', 'upgrade', 'magic', 'materials'] as const)('首页卡片可以进入 %s，回首页后恢复根地址', (workspace) => {
     render(<App />)
     const link = screen.getByRole('link', { name: `进入${WORKSPACE_LABELS[workspace]}` })
@@ -61,7 +68,7 @@ describe('首页快捷导航', () => {
       expect(pageNavigation.queryByRole('button', { name: '抗魔计算器' })).not.toBeInTheDocument()
       expect(pageNavigation.queryByRole('button', { name: '消耗材料查询' })).not.toBeInTheDocument()
     } else {
-      expect(pageNavigation.getByText('抗魔与材料')).toBeVisible()
+      expect(pageNavigation.queryByText('抗魔与材料')).not.toBeInTheDocument()
       expect(pageNavigation.getByRole('button', { name: '抗魔计算器' })).toBeVisible()
       expect(pageNavigation.getByRole('button', { name: '消耗材料查询' })).toBeVisible()
       expect(pageNavigation.queryByRole('button', { name: '战力计算器' })).not.toBeInTheDocument()
