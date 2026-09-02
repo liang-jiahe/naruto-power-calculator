@@ -456,7 +456,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   pointer-events: none;
   filter: drop-shadow(0 8px 8px rgba(80, 66, 55, .12));
 }
-.eyebrow { color: var(--primary); font-size: 11px; letter-spacing: .18em; font-weight: 800; }
+.eyebrow { color: var(--primary); font-size: 11px; letter-spacing: .05em; font-weight: 800; }
 .bonus-panel h2, .section-head h2 { margin: 4px 0 5px; color: var(--primary-deep); font-size: 22px; }
 .bonus-panel p, .section-head p { margin: 0; color: #68736d; font-size: 13px; line-height: 1.7; }
 .bonus-fields { display: grid; grid-template-columns: 1.25fr repeat(3, 1fr); gap: 10px; }
