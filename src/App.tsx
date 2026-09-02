@@ -10,6 +10,7 @@ import {
   FileDown,
   House,
   Menu,
+  PackageSearch,
   PawPrint,
   Printer,
   RotateCcw,
@@ -33,6 +34,8 @@ import {
 } from './components'
 import { ThemedSelect } from './ThemedSelect'
 import { UpgradeCalculator } from './upgrade/UpgradeCalculator'
+import { MagicCalculator } from './magic/MagicCalculator'
+import { MaterialsCalculator } from './magic/MaterialsCalculator'
 import { SUMMON_DATA } from './domain/data'
 import { calculateAll } from './domain/engine'
 import { buildFormulaText, resolveModuleFormulas } from './domain/formulas'
@@ -64,6 +67,17 @@ const navItems = [
   ['title', '称号'],
   ['avatar', '头像框'],
 ] as const
+
+const workspaceLabels = {
+  power: '战力计算器',
+  upgrade: '升级时间计算',
+  magic: '抗魔计算器',
+  materials: '消耗材料查询',
+} as const
+type Workspace = keyof typeof workspaceLabels
+const workspaceTargets: Record<Workspace, string> = {
+  power: 'overview', upgrade: 'upgrade-top', magic: 'magic-top', materials: 'materials-top',
+}
 
 const sectionLabels: Record<string, string> = {
   level: '等级',
@@ -165,9 +179,8 @@ function SummonPowerCard({
 function App() {
   const [state, setState] = useState<CalculatorState>(loadState)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [activeWorkspace, setActiveWorkspace] = useState<'power' | 'upgrade'>('power')
-  const [powerNavOpen, setPowerNavOpen] = useState(true)
-  const [upgradeResetSignal, setUpgradeResetSignal] = useState(0)
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('power')
+  const [powerNavOpen, setPowerNavOpen] = useState(false)
   const [exportingPdf, setExportingPdf] = useState(false)
   const [toast, setToast] = useState('已载入本机数据')
   const fileInput = useRef<HTMLInputElement>(null)
@@ -246,16 +259,10 @@ function App() {
   }
 
   const reset = () => {
-    const label = activeWorkspace === 'power' ? '战力计算器' : '升级时间计算'
-    if (!window.confirm(`确定清空${label}的全部输入并恢复默认值吗？`)) return
-    if (activeWorkspace === 'power') {
-      localStorage.removeItem(STORAGE_KEY)
-      setState(initialState())
-      setToast('战力计算器已恢复默认值')
-    } else {
-      setUpgradeResetSignal((current) => current + 1)
-      setToast('升级时间计算已恢复默认值')
-    }
+    if (!window.confirm('确定清空战力计算器的全部输入并恢复默认值吗？')) return
+    localStorage.removeItem(STORAGE_KEY)
+    setState(initialState())
+    setToast('战力计算器已恢复默认值')
   }
 
   const scrollToSection = (id: string) => {
@@ -264,10 +271,10 @@ function App() {
     })
   }
 
-  const switchWorkspace = (workspace: 'power' | 'upgrade', target?: string) => {
+  const switchWorkspace = (workspace: Workspace, target?: string) => {
     setActiveWorkspace(workspace)
     setMenuOpen(false)
-    scrollToSection(target ?? (workspace === 'power' ? 'overview' : 'upgrade-top'))
+    scrollToSection(target ?? workspaceTargets[workspace])
   }
 
   const chartData = Object.entries(result.sections)
@@ -319,9 +326,26 @@ function App() {
           <button
             className={activeWorkspace === 'upgrade' ? 'workspace-nav-button active' : 'workspace-nav-button'}
             type="button"
+            aria-current={activeWorkspace === 'upgrade' ? 'page' : undefined}
             onClick={() => switchWorkspace('upgrade')}
           >
             <Clock3 size={15} /><span>升级时间计算</span>
+          </button>
+          <button
+            className={activeWorkspace === 'magic' ? 'workspace-nav-button active' : 'workspace-nav-button'}
+            type="button"
+            aria-current={activeWorkspace === 'magic' ? 'page' : undefined}
+            onClick={() => switchWorkspace('magic')}
+          >
+            <ShieldCheck size={15} /><span>抗魔计算器</span>
+          </button>
+          <button
+            className={activeWorkspace === 'materials' ? 'workspace-nav-button active' : 'workspace-nav-button'}
+            type="button"
+            aria-current={activeWorkspace === 'materials' ? 'page' : undefined}
+            onClick={() => switchWorkspace('materials')}
+          >
+            <PackageSearch size={15} /><span>消耗材料查询</span>
           </button>
         </nav>
         <img
@@ -340,19 +364,23 @@ function App() {
         <header className="topbar">
           <div className="save-state">
             <Save size={15} />
-            {activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : '升级配置仅在本次会话保留'}
+            {activeWorkspace === 'power' ? (toast || '本机自动保存已开启') : `${workspaceLabels[activeWorkspace]}配置仅在本次会话保留`}
           </div>
           <div className="toolbar">
-            <button onClick={exportPdf} disabled={exportingPdf} title="直接下载 PDF 文本报告">
-              <Download size={16} />{exportingPdf ? '生成中…' : '下载 PDF'}
-            </button>
-            <button onClick={() => fileInput.current?.click()} disabled title="暂未开放"><Upload size={16} />导入</button>
-            <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')} disabled title="暂未开放">
-              <FileDown size={16} />公式
-            </button>
-            <button onClick={() => window.print()} disabled title="暂未开放"><Printer size={16} />PDF</button>
-            <button className="danger" onClick={reset}><RotateCcw size={16} />清空</button>
-            <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => importJson(e.target.files?.[0])} />
+            {activeWorkspace === 'power' && (
+              <>
+                <button onClick={exportPdf} disabled={exportingPdf} title="直接下载 PDF 文本报告">
+                  <Download size={16} />{exportingPdf ? '生成中…' : '下载 PDF'}
+                </button>
+                <button onClick={() => fileInput.current?.click()} disabled title="暂未开放"><Upload size={16} />导入</button>
+                <button onClick={() => downloadText('火影战力公式.txt', buildFormulaText(formulas), 'text/plain;charset=utf-8')} disabled title="暂未开放">
+                  <FileDown size={16} />公式
+                </button>
+                <button onClick={() => window.print()} disabled title="暂未开放"><Printer size={16} />PDF</button>
+                <button className="danger" onClick={reset}><RotateCcw size={16} />清空</button>
+                <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => importJson(e.target.files?.[0])} />
+              </>
+            )}
             <div className="creator-signature" aria-label="署名：繁星の猫猫星">
               <Cat size={17} aria-hidden="true" />
               <span>繁星の猫猫星</span>
@@ -550,7 +578,13 @@ function App() {
           <footer><BookOpenText size={17} /><p>本工具为非官方同人计算项目，仅供数据分析与交流，不代表游戏官方规则或数值承诺。</p></footer>
         </div>
         <div className="workspace-view" hidden={activeWorkspace !== 'upgrade'}>
-          <UpgradeCalculator resetSignal={upgradeResetSignal} />
+          <UpgradeCalculator resetSignal={0} />
+        </div>
+        <div className="workspace-view" hidden={activeWorkspace !== 'magic'}>
+          <MagicCalculator />
+        </div>
+        <div className="workspace-view" hidden={activeWorkspace !== 'materials'}>
+          <MaterialsCalculator />
         </div>
       </main>
       <nav className="mobile-bottom-nav" aria-label="手机端主导航">
@@ -562,13 +596,21 @@ function App() {
             <button type="button" onClick={() => scrollToSection('tools')}><Sparkles size={20} /><span>忍具</span></button>
             <button type="button" onClick={() => scrollToSection('accessories')}><ShieldCheck size={20} /><span>符文</span></button>
           </>
-        ) : (
+        ) : activeWorkspace === 'upgrade' ? (
           <>
             <button type="button" onClick={() => switchWorkspace('power')}><House size={20} /><span>战力</span></button>
             <button type="button" onClick={() => scrollToSection('upgrade-results')}><BarChart3 size={20} /><span>结果</span></button>
             <button className="mobile-fab" type="button" aria-label="升级时间计算顶部" onClick={() => scrollToSection('upgrade-top')}><Cat size={27} /></button>
             <button type="button" onClick={() => scrollToSection('upgrade-reference')}><BookOpenText size={20} /><span>经验表</span></button>
             <button type="button" onClick={() => scrollToSection('upgrade-top')}><Clock3 size={20} /><span>升级</span></button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={() => switchWorkspace('power')}><House size={20} /><span>战力</span></button>
+            <button type="button" onClick={() => switchWorkspace('upgrade')}><Clock3 size={20} /><span>升级</span></button>
+            <button className="mobile-fab" type="button" aria-label={`${workspaceLabels[activeWorkspace]}顶部`} onClick={() => scrollToSection(workspaceTargets[activeWorkspace])}><Cat size={27} /></button>
+            <button type="button" aria-current={activeWorkspace === 'magic' ? 'page' : undefined} onClick={() => switchWorkspace('magic')}><ShieldCheck size={20} /><span>抗魔</span></button>
+            <button type="button" aria-current={activeWorkspace === 'materials' ? 'page' : undefined} onClick={() => switchWorkspace('materials')}><PackageSearch size={20} /><span>材料</span></button>
           </>
         )}
       </nav>
