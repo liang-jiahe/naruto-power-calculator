@@ -46,7 +46,25 @@ describe('首页快捷导航', () => {
     expect(document.getElementById(WORKSPACE_TARGETS[workspace])).toBeVisible()
     expect(screen.getAllByRole('main')).toHaveLength(1)
     expect(screen.getByRole('main')).toHaveClass('calculator-main')
-    expect(screen.getByRole('navigation', { name: '页面导航' })).toBeVisible()
+    const pageNavigation = within(screen.getByRole('navigation', { name: '页面导航' }))
+    expect(pageNavigation.getByRole('button', { name: '首页' })).toBeVisible()
+    if (workspace === 'power') {
+      expect(pageNavigation.getByRole('button', { name: '战力计算器' })).toBeVisible()
+      expect(pageNavigation.queryByRole('button', { name: '升级时间计算' })).not.toBeInTheDocument()
+      expect(pageNavigation.queryByRole('button', { name: '抗魔计算器' })).not.toBeInTheDocument()
+      expect(pageNavigation.queryByRole('button', { name: '消耗材料查询' })).not.toBeInTheDocument()
+    } else if (workspace === 'upgrade') {
+      expect(pageNavigation.getByRole('button', { name: '升级时间计算' })).toBeVisible()
+      expect(pageNavigation.queryByRole('button', { name: '战力计算器' })).not.toBeInTheDocument()
+      expect(pageNavigation.queryByRole('button', { name: '抗魔计算器' })).not.toBeInTheDocument()
+      expect(pageNavigation.queryByRole('button', { name: '消耗材料查询' })).not.toBeInTheDocument()
+    } else {
+      expect(pageNavigation.getByText('抗魔与材料')).toBeVisible()
+      expect(pageNavigation.getByRole('button', { name: '抗魔计算器' })).toBeVisible()
+      expect(pageNavigation.getByRole('button', { name: '消耗材料查询' })).toBeVisible()
+      expect(pageNavigation.queryByRole('button', { name: '战力计算器' })).not.toBeInTheDocument()
+      expect(pageNavigation.queryByRole('button', { name: '升级时间计算' })).not.toBeInTheDocument()
+    }
     expect(document.querySelector('.topbar')).toBeVisible()
     expect(screen.queryByRole('heading', { name: '工具箱（4 个工具）', level: 1 })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '首页' }))
@@ -155,7 +173,10 @@ describe('地址恢复与历史导航', () => {
   it('浏览器后退和前进会同步可见板块与地址', async () => {
     render(<App />)
     fireEvent.click(screen.getByRole('link', { name: '进入升级时间计算' }))
-    fireEvent.click(screen.getByRole('button', { name: '消耗材料查询' }))
+    act(() => {
+      window.history.pushState(null, '', routeHref('materials'))
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
     act(() => window.history.back())
     await waitFor(() => expect(document.getElementById('upgrade-top')).toBeVisible())
     expect(window.location.hash).toBe('#/upgrade')

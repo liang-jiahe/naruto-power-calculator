@@ -324,52 +324,58 @@ function App() {
             >
               <House size={15} /><span>首页</span>
             </button>
-            <button
-              className={activeWorkspace === 'power' ? 'nav-group-trigger active' : 'nav-group-trigger'}
-              type="button"
-              aria-expanded={powerNavOpen}
-              aria-controls="power-nav-items"
-              onClick={() => setPowerNavOpen((current) => !current)}
-            >
-              <span><BarChart3 size={15} />战力计算器</span>
-              <ChevronRight className={powerNavOpen ? 'nav-arrow open' : 'nav-arrow'} size={15} />
-            </button>
-            <div className="nav-subitems" id="power-nav-items" hidden={!powerNavOpen}>
-              {navItems.map(([id, label]) => (
-                <a
-                  key={id}
-                  href={routeHref('power', id)}
-                  aria-current={activeWorkspace === 'power' && route.section === id ? 'location' : undefined}
-                  onClick={(event) => navigateLink(event, 'power', id)}
+            {activeWorkspace === 'power' && (
+              <>
+                <button
+                  className="nav-group-trigger active"
+                  type="button"
+                  aria-expanded={powerNavOpen}
+                  aria-controls="power-nav-items"
+                  onClick={() => setPowerNavOpen((current) => !current)}
                 >
-                  <ChevronRight size={13} /><span>{label}</span>
-                </a>
-              ))}
-            </div>
-            <button
-              className={activeWorkspace === 'upgrade' ? 'workspace-nav-button active' : 'workspace-nav-button'}
-              type="button"
-              aria-current={activeWorkspace === 'upgrade' ? 'page' : undefined}
-              onClick={() => switchWorkspace('upgrade')}
-            >
-              <Clock3 size={15} /><span>升级时间计算</span>
-            </button>
-            <button
-              className={activeWorkspace === 'magic' ? 'workspace-nav-button active' : 'workspace-nav-button'}
-              type="button"
-              aria-current={activeWorkspace === 'magic' ? 'page' : undefined}
-              onClick={() => switchWorkspace('magic')}
-            >
-              <ShieldCheck size={15} /><span>抗魔计算器</span>
-            </button>
-            <button
-              className={activeWorkspace === 'materials' ? 'workspace-nav-button active' : 'workspace-nav-button'}
-              type="button"
-              aria-current={activeWorkspace === 'materials' ? 'page' : undefined}
-              onClick={() => switchWorkspace('materials')}
-            >
-              <PackageSearch size={15} /><span>消耗材料查询</span>
-            </button>
+                  <span><BarChart3 size={15} />战力计算器</span>
+                  <ChevronRight className={powerNavOpen ? 'nav-arrow open' : 'nav-arrow'} size={15} />
+                </button>
+                <div className="nav-subitems" id="power-nav-items" hidden={!powerNavOpen}>
+                  {navItems.map(([id, label]) => (
+                    <a
+                      key={id}
+                      href={routeHref('power', id)}
+                      aria-current={route.section === id ? 'location' : undefined}
+                      onClick={(event) => navigateLink(event, 'power', id)}
+                    >
+                      <ChevronRight size={13} /><span>{label}</span>
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
+            {activeWorkspace === 'upgrade' && (
+              <button className="workspace-nav-button active" type="button" aria-current="page" onClick={() => switchWorkspace('upgrade')}>
+                <Clock3 size={15} /><span>升级时间计算</span>
+              </button>
+            )}
+            {(activeWorkspace === 'magic' || activeWorkspace === 'materials') && (
+              <div className="sidebar-tool-group" role="group" aria-labelledby="accessory-tools-label">
+                <div className="sidebar-category" id="accessory-tools-label"><ShieldCheck size={15} /><span>抗魔与材料</span></div>
+                <button
+                  className={activeWorkspace === 'magic' ? 'workspace-nav-button active' : 'workspace-nav-button'}
+                  type="button"
+                  aria-current={activeWorkspace === 'magic' ? 'page' : undefined}
+                  onClick={() => switchWorkspace('magic')}
+                >
+                  <ShieldCheck size={15} /><span>抗魔计算器</span>
+                </button>
+                <button
+                  className={activeWorkspace === 'materials' ? 'workspace-nav-button active' : 'workspace-nav-button'}
+                  type="button"
+                  aria-current={activeWorkspace === 'materials' ? 'page' : undefined}
+                  onClick={() => switchWorkspace('materials')}
+                >
+                  <PackageSearch size={15} /><span>消耗材料查询</span>
+                </button>
+              </div>
+            )}
           </nav>
           <img
             className="sidebar-cat-sticker"

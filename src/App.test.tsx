@@ -8,9 +8,24 @@ const openPowerOverview = () => {
     fireEvent.click(homeLink)
     return
   }
-  const trigger = screen.getByRole('button', { name: '战力计算器' })
+  const trigger = screen.queryByRole('button', { name: '战力计算器' })
+  if (!trigger) {
+    fireEvent.click(screen.getByRole('button', { name: '首页' }))
+    fireEvent.click(screen.getByRole('link', { name: '进入战力计算器' }))
+    return
+  }
   if (trigger.getAttribute('aria-expanded') === 'false') fireEvent.click(trigger)
   fireEvent.click(screen.getByRole('link', { name: '战力总览' }))
+}
+
+const openWorkspace = (title: '战力计算器' | '升级时间计算' | '抗魔计算器' | '消耗材料查询') => {
+  const link = screen.queryByRole('link', { name: `进入${title}` })
+  if (link) {
+    fireEvent.click(link)
+    return
+  }
+  fireEvent.click(screen.getByRole('button', { name: '首页' }))
+  fireEvent.click(screen.getByRole('link', { name: `进入${title}` }))
 }
 
 describe('多板块导航与状态', () => {
@@ -20,20 +35,21 @@ describe('多板块导航与状态', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
   })
 
-  it('战力计算器导航默认折叠并可展开，再次点击收起', () => {
+  it('侧边栏只显示当前工具，战力分项仍可折叠展开', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('link', { name: '进入升级时间计算' }))
+    expect(screen.queryByRole('button', { name: '战力计算器' })).not.toBeInTheDocument()
+    openPowerOverview()
     const trigger = screen.getByRole('button', { name: '战力计算器' })
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.click(trigger)
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryByRole('link', { name: '战力总览' })).not.toBeInTheDocument()
 
     fireEvent.click(trigger)
     expect(trigger).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByRole('link', { name: '战力总览' })).toBeVisible()
-
-    fireEvent.click(trigger)
-    expect(trigger).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.queryByRole('link', { name: '战力总览' })).not.toBeInTheDocument()
   })
 
   it('切换板块时保留升级输入，重新挂载后恢复默认', () => {
@@ -43,12 +59,12 @@ describe('多板块导航与状态', () => {
     fireEvent.change(currentExp, { target: { value: '123' } })
 
     openPowerOverview()
-    fireEvent.click(screen.getByRole('button', { name: '升级时间计算' }))
+    openWorkspace('升级时间计算')
     expect(screen.getByRole('spinbutton', { name: /本级已有经验/ })).toHaveValue(123)
 
     view.unmount()
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: '升级时间计算' }))
+    openWorkspace('升级时间计算')
     expect(screen.getByRole('spinbutton', { name: /本级已有经验/ })).toHaveValue(0)
   })
 
@@ -88,7 +104,7 @@ describe('多板块导航与状态', () => {
   it('侧边栏可进入抗魔与材料板块，切换后保留输入和更换标记', () => {
     render(<App />)
     openPowerOverview()
-    fireEvent.click(screen.getByRole('button', { name: '抗魔计算器' }))
+    openWorkspace('抗魔计算器')
     expect(screen.getByRole('heading', { name: '抗魔计算器' })).toBeVisible()
     expect(screen.getByRole('button', { name: '抗魔计算器' })).toHaveAttribute('aria-current', 'page')
     fireEvent.change(screen.getByRole('spinbutton', { name: '耳环基础抗魔' }), { target: { value: '4111' } })
@@ -109,17 +125,17 @@ describe('多板块导航与状态', () => {
     render(<App />)
     openPowerOverview()
     fireEvent.change(screen.getByRole('spinbutton', { name: '当前等级' }), { target: { value: '60' } })
-    fireEvent.click(screen.getByRole('button', { name: '升级时间计算' }))
+    openWorkspace('升级时间计算')
     fireEvent.change(screen.getByRole('spinbutton', { name: /本级已有经验/ }), { target: { value: '123' } })
-    fireEvent.click(screen.getByRole('button', { name: '消耗材料查询' }))
+    openWorkspace('消耗材料查询')
     fireEvent.click(screen.getByRole('combobox', { name: '目标强化等级' }))
     fireEvent.click(screen.getByRole('option', { name: '+3' }))
-    fireEvent.click(screen.getByRole('button', { name: '抗魔计算器' }))
+    openWorkspace('抗魔计算器')
     fireEvent.change(screen.getByRole('spinbutton', { name: '耳环基础抗魔' }), { target: { value: '999' } })
     fireEvent.click(screen.getByRole('button', { name: '重置默认值' }))
     expect(screen.getByRole('spinbutton', { name: '耳环基础抗魔' })).toHaveValue(0)
     fireEvent.change(screen.getByRole('spinbutton', { name: '耳环基础抗魔' }), { target: { value: '222' } })
-    fireEvent.click(screen.getByRole('button', { name: '消耗材料查询' }))
+    openWorkspace('消耗材料查询')
     expect(screen.getByRole('combobox', { name: '目标强化等级' })).toHaveTextContent('+3')
     openPowerOverview()
     expect(screen.getByRole('spinbutton', { name: '当前等级' })).toHaveValue(60)
@@ -128,24 +144,24 @@ describe('多板块导航与状态', () => {
     expect(screen.getByRole('spinbutton', { name: '当前等级' })).toHaveValue(60)
     fireEvent.click(screen.getByRole('button', { name: '清空' }))
     expect(window.confirm).toHaveBeenLastCalledWith('确定清空战力计算器的全部输入并恢复默认值吗？')
-    fireEvent.click(screen.getByRole('button', { name: '抗魔计算器' }))
+    openWorkspace('抗魔计算器')
     expect(screen.getByRole('spinbutton', { name: '耳环基础抗魔' })).toHaveValue(222)
-    fireEvent.click(screen.getByRole('button', { name: '升级时间计算' }))
+    openWorkspace('升级时间计算')
     expect(screen.getByRole('spinbutton', { name: /本级已有经验/ })).toHaveValue(123)
-    fireEvent.click(screen.getByRole('button', { name: '消耗材料查询' }))
+    openWorkspace('消耗材料查询')
     expect(screen.getByRole('combobox', { name: '目标强化等级' })).toHaveTextContent('+3')
   }, 15000)
 
   it('移动导航打开新板块后关闭侧栏，底部导航可在抗魔和材料间切换', () => {
     render(<App />)
-    openPowerOverview()
+    openWorkspace('抗魔计算器')
     fireEvent.click(screen.getByRole('button', { name: '打开导航' }))
     expect(document.querySelector('.sidebar')).toHaveClass('open')
-    fireEvent.click(screen.getByRole('button', { name: '抗魔计算器' }))
-    expect(document.querySelector('.sidebar')).not.toHaveClass('open')
     fireEvent.change(screen.getByRole('spinbutton', { name: '耳环基础抗魔' }), { target: { value: '123' } })
-    fireEvent.click(screen.getByRole('button', { name: '材料' }))
+    fireEvent.click(screen.getByRole('button', { name: '消耗材料查询' }))
+    expect(document.querySelector('.sidebar')).not.toHaveClass('open')
     expect(screen.getByRole('heading', { name: '强化材料查询' })).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: '材料' }))
     fireEvent.click(screen.getByRole('button', { name: '抗魔' }))
     expect(screen.getByRole('spinbutton', { name: '耳环基础抗魔' })).toHaveValue(123)
   }, 15000)
